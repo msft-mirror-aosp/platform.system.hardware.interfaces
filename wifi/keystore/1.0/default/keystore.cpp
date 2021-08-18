@@ -7,18 +7,16 @@
 #include <android-base/strings.h>
 #include <android/binder_manager.h>
 #include <binder/IServiceManager.h>
-#include <ctype.h>
 #include <openssl/base.h>
 #include <openssl/bio.h>
 #include <openssl/pem.h>
 #include <openssl/x509.h>
 #include <private/android_filesystem_config.h>
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
-#include <future>
 #include <vector>
+
+#include "wifikeystorehal_utils.h"
 
 #define AT __func__ << ":" << __LINE__ << " "
 
@@ -34,43 +32,6 @@ constexpr const char kKeystore2ServiceName[] = "android.system.keystore2.IKeysto
 constexpr const char kLegacyKeystoreServiceName[] = "android.security.legacykeystore";
 
 const std::string keystore2_grant_id_prefix("ks2_keystore-engine_grant_id:");
-
-// Helper method to extract public key from the certificate.
-std::vector<uint8_t> extractPubKey(const std::vector<uint8_t>& cert_bytes) {
-    bssl::UniquePtr<BIO> cert_bio(BIO_new_mem_buf(cert_bytes.data(), cert_bytes.size()));
-    if (!cert_bio) {
-        LOG(ERROR) << AT << "Failed to create BIO";
-        return {};
-    }
-    bssl::UniquePtr<X509> decoded_cert(d2i_X509_bio(cert_bio.get(), nullptr));
-    if (!decoded_cert) {
-        LOG(INFO) << AT << "Could not decode the cert, trying decoding as PEM";
-        decoded_cert =
-            bssl::UniquePtr<X509>(PEM_read_bio_X509(cert_bio.get(), nullptr, nullptr, nullptr));
-    }
-    if (!decoded_cert) {
-        LOG(ERROR) << AT << "Could not decode the cert.";
-        return {};
-    }
-    bssl::UniquePtr<EVP_PKEY> pub_key(X509_get_pubkey(decoded_cert.get()));
-    if (!pub_key) {
-        LOG(ERROR) << AT << "Could not extract public key.";
-        return {};
-    }
-    bssl::UniquePtr<BIO> pub_key_bio(BIO_new(BIO_s_mem()));
-    if (!pub_key_bio || i2d_PUBKEY_bio(pub_key_bio.get(), pub_key.get()) <= 0) {
-        LOG(ERROR) << AT << "Could not serialize public key.";
-        return {};
-    }
-    const uint8_t* pub_key_bytes;
-    size_t pub_key_len;
-    if (!BIO_mem_contents(pub_key_bio.get(), &pub_key_bytes, &pub_key_len)) {
-        LOG(ERROR) << AT << "Could not get bytes from BIO.";
-        return {};
-    }
-
-    return {pub_key_bytes, pub_key_bytes + pub_key_len};
-}
 
 ks2::KeyDescriptor mkKeyDescriptor(const std::string& alias) {
     // If the key_id starts with the grant id prefix, we parse the following string as numeric
@@ -100,6 +61,46 @@ ks2::KeyDescriptor mkKeyDescriptor(const std::string& alias) {
 
 using android::hardware::hidl_string;
 using android::hardware::hidl_vec;
+
+// Helper method to convert certs in DER format to PEM format required by
+// openssl library used by supplicant. If boringssl cannot parse the input as one or more
+// X509 certificates in DER encoding, this function returns the input as-is. The assumption in
+// that case is that either the `cert_bytes` is already PEM encoded, or `cert_bytes` is something
+// completely different that was intentionally installed by the Wi-Fi subsystem and it must not
+// be changed here.
+// If any error occurs during PEM encoding, this function returns std::nullopt and logs an error.
+std::optional<hidl_vec<uint8_t>> convertDerCertToPemOrPassthrough(
+    const std::vector<uint8_t>& cert_bytes) {
+    // If cert_bytes is a DER encoded X509 certificate, it must be reencoded as PEM, because
+    // wpa_supplicant only understand PEM. Otherwise the cert_bytes are returned as is.
+    const uint8_t* cert_current = cert_bytes.data();
+    const uint8_t* cert_end = cert_current + cert_bytes.size();
+    bssl::UniquePtr<BIO> pem_bio(BIO_new(BIO_s_mem()));
+    while (cert_current < cert_end) {
+        auto cert =
+            bssl::UniquePtr<X509>(d2i_X509(nullptr, &cert_current, cert_end - cert_current));
+        // If part of the bytes cannot be parsed as X509 DER certificate, the original blob
+        // shall be returned as-is.
+        if (!cert) {
+            LOG(WARNING) << AT
+                         << "Could not parse DER X509 cert from buffer. Returning blob as is.";
+            return cert_bytes;
+        }
+
+        if (!PEM_write_bio_X509(pem_bio.get(), cert.get())) {
+            LOG(ERROR) << AT << "Could not convert cert to PEM format.";
+            return std::nullopt;
+        }
+    }
+
+    const uint8_t* pem_bytes;
+    size_t pem_len;
+    if (!BIO_mem_contents(pem_bio.get(), &pem_bytes, &pem_len)) {
+        LOG(ERROR) << AT << "Could not extract pem_bytes from BIO.";
+        return std::nullopt;
+    }
+    return {{pem_bytes, pem_bytes + pem_len}};
+}
 
 std::optional<std::vector<uint8_t>> keyStore2GetCert(const hidl_string& key) {
     ::ndk::SpAIBinder keystoreBinder(AServiceManager_checkService(kKeystore2ServiceName));
@@ -326,12 +327,21 @@ namespace V1_0 {
 namespace implementation {
 // Methods from ::android::hardware::wifi::keystore::V1_0::IKeystore follow.
 Return<void> Keystore::getBlob(const hidl_string& key, getBlob_cb _hidl_cb) {
+    std::vector<uint8_t> result_cert;
     if (auto ks2_cert = keyStore2GetCert(key)) {
-        _hidl_cb(KeystoreStatusCode::SUCCESS, std::move(*ks2_cert));
+        result_cert = std::move(*ks2_cert);
     } else if (auto blob = getLegacyKeystoreBlob(key)) {
-        _hidl_cb(KeystoreStatusCode::SUCCESS, *blob);
+        result_cert = std::move(*blob);
     } else {
         LOG(ERROR) << AT << "Failed to get certificate.";
+        _hidl_cb(KeystoreStatusCode::ERROR_UNKNOWN, {});
+        return Void();
+    }
+
+    if (auto result_cert_hidl = convertDerCertToPemOrPassthrough(result_cert)) {
+        _hidl_cb(KeystoreStatusCode::SUCCESS, *result_cert_hidl);
+    } else {
+        LOG(ERROR) << AT << "Conversion to PEM failed.";
         _hidl_cb(KeystoreStatusCode::ERROR_UNKNOWN, {});
     }
     return Void();
