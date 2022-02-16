@@ -1,5 +1,5 @@
 <manifest version="1.0" type="framework">
-    <hal max-level="6">
+    <hal>
         <name>android.system.suspend</name>
         <transport>hwbinder</transport>
         <version>1.0</version>
@@ -7,10 +7,5 @@
             <name>ISystemSuspend</name>
             <instance>default</instance>
         </interface>
-    </hal>
-    <hal format="aidl">
-        <name>android.system.suspend</name>
-        <version>1</version>
-        <fqname>ISystemSuspend/default</fqname>
     </hal>
 </manifest>
