@@ -14,30 +14,24 @@
  * limitations under the License.
  */
 
-#include <aidl/android/system/suspend/ISystemSuspend.h>
-#include <aidl/android/system/suspend/IWakeLock.h>
-#include <android/binder_manager.h>
+#include <android/system/suspend/1.0/ISystemSuspend.h>
 #include <android/system/suspend/internal/ISuspendControlServiceInternal.h>
 #include <benchmark/benchmark.h>
 #include <binder/IServiceManager.h>
 
-using aidl::android::system::suspend::ISystemSuspend;
-using aidl::android::system::suspend::IWakeLock;
-using aidl::android::system::suspend::WakeLockType;
 using android::IBinder;
 using android::sp;
 using android::system::suspend::internal::ISuspendControlServiceInternal;
 using android::system::suspend::internal::WakeLockInfo;
+using android::system::suspend::V1_0::ISystemSuspend;
+using android::system::suspend::V1_0::IWakeLock;
+using android::system::suspend::V1_0::WakeLockType;
 
 static void BM_acquireWakeLock(benchmark::State& state) {
-    static const std::string suspendInstance =
-        std::string() + ISystemSuspend::descriptor + "/default";
-    static std::shared_ptr<ISystemSuspend> suspendService = ISystemSuspend::fromBinder(
-        ndk::SpAIBinder(AServiceManager_waitForService(suspendInstance.c_str())));
+    static sp<ISystemSuspend> suspendService = ISystemSuspend::getService();
 
     while (state.KeepRunning()) {
-        std::shared_ptr<IWakeLock> wl = nullptr;
-        suspendService->acquireWakeLock(WakeLockType::PARTIAL, "BenchmarkWakeLock", &wl);
+        suspendService->acquireWakeLock(WakeLockType::PARTIAL, "BenchmarkWakeLock");
     }
 }
 BENCHMARK(BM_acquireWakeLock);
