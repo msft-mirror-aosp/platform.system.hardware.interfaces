@@ -10,11 +10,9 @@ cc_library_static {
         "-Wextra",
     ],
     srcs: ["keystore.cpp"],
-    defaults: [
-        "keystore2_use_latest_aidl_ndk_shared",
-    ],
     shared_libs: [
-        "android.security.legacykeystore-ndk",
+        "android.system.keystore2-V1-ndk_platform",
+        "android.security.legacykeystore-ndk_platform",
         "android.system.wifi.keystore@1.0",
         "libbase",
         "libbinder",
