@@ -370,13 +370,12 @@ void WakeLockEntryList::updateNow() {
 }
 
 void WakeLockEntryList::getWakeLockStats(std::vector<WakeLockInfo>* aidl_return) const {
-    // Under no circumstances should the lock be held while getting kernel wakelock stats
-    {
-        std::lock_guard<std::mutex> lock(mStatsLock);
-        for (const WakeLockInfo& entry : mStats) {
-            aidl_return->emplace_back(entry);
-        }
+    std::lock_guard<std::mutex> lock(mStatsLock);
+
+    for (const WakeLockInfo& entry : mStats) {
+        aidl_return->emplace_back(entry);
     }
+
     getKernelWakelockStats(aidl_return);
 }
 
