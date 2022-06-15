@@ -18,15 +18,10 @@
 
 #include <android-base/file.h>
 #include <android-base/logging.h>
-#include <android-base/parseint.h>
-#include <android-base/stringprintf.h>
 
 #include <iomanip>
 
-using android::base::ParseInt;
 using android::base::ReadFdToString;
-using android::base::Readlink;
-using android::base::StringPrintf;
 
 namespace android {
 namespace system {
@@ -224,13 +219,7 @@ WakeLockInfo WakeLockEntryList::createKernelEntry(const std::string& kwlId) cons
     unique_fd wakelockFd{TEMP_FAILURE_RETRY(
         openat(mKernelWakelockStatsFd, kwlId.c_str(), O_DIRECTORY | O_CLOEXEC | O_RDONLY))};
     if (wakelockFd < 0) {
-        char buf[PATH_MAX];
-        ssize_t data_length =
-            readlinkat(mKernelWakelockStatsFd, kwlId.c_str(), buf, sizeof(buf) - 1);
-        if (data_length <= 0 || strncmp(kwlId.c_str(), buf, kwlId.length()) == 0) {
-            buf[0] = '\0';
-        }
-        PLOG(ERROR) << "Error opening kernel wakelock stats for: " << kwlId << " (" << buf << ")";
+        PLOG(ERROR) << "Error opening kernel wakelock stats for: " << kwlId;
     }
 
     std::unique_ptr<DIR, decltype(&closedir)> wakelockDp(fdopendir(dup(wakelockFd.get())),
@@ -263,17 +252,7 @@ WakeLockInfo WakeLockEntryList::createKernelEntry(const std::string& kwlId) cons
                 continue;
             }
 
-            int64_t statVal;
-            if (!ParseInt(valStr, &statVal)) {
-                std::string path;
-                if (Readlink(StringPrintf("/proc/self/fd/%d", statFd.get()), &path)) {
-                    LOG(ERROR) << "Unexpected format for wakelock stat value (" << valStr
-                               << ") from file: " << path;
-                } else {
-                    LOG(ERROR) << "Unexpected format for wakelock stat value (" << valStr << ")";
-                }
-                continue;
-            }
+            int64_t statVal = std::stoll(valStr);
 
             if (statName == "active_count") {
                 info.activeCount = statVal;
@@ -322,9 +301,7 @@ void WakeLockEntryList::getKernelWakelockStats(std::vector<WakeLockInfo>* aidl_r
     }
 }
 
-void WakeLockEntryList::updateOnAcquire(const std::string& name, int pid) {
-    TimestampType timeNow = getTimeNow();
-
+void WakeLockEntryList::updateOnAcquire(const std::string& name, int pid, TimestampType timeNow) {
     std::lock_guard<std::mutex> lock(mStatsLock);
 
     auto key = std::make_pair(name, pid);
@@ -348,9 +325,7 @@ void WakeLockEntryList::updateOnAcquire(const std::string& name, int pid) {
     }
 }
 
-void WakeLockEntryList::updateOnRelease(const std::string& name, int pid) {
-    TimestampType timeNow = getTimeNow();
-
+void WakeLockEntryList::updateOnRelease(const std::string& name, int pid, TimestampType timeNow) {
     std::lock_guard<std::mutex> lock(mStatsLock);
 
     auto key = std::make_pair(name, pid);
