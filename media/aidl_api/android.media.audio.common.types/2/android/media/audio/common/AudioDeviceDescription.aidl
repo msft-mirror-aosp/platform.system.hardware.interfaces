@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,20 +31,23 @@
 // with such a backward incompatible change, it has a high risk of breaking
 // later when a module using the interface is updated, e.g., Mainline modules.
 
-package android.system.keystore2;
+package android.media.audio.common;
 /* @hide */
-@VintfStability
-interface IKeystoreService {
-  android.system.keystore2.IKeystoreSecurityLevel getSecurityLevel(in android.hardware.security.keymint.SecurityLevel securityLevel);
-  android.system.keystore2.KeyEntryResponse getKeyEntry(in android.system.keystore2.KeyDescriptor key);
-  void updateSubcomponent(in android.system.keystore2.KeyDescriptor key, in @nullable byte[] publicCert, in @nullable byte[] certificateChain);
-  /**
-   * @deprecated use listEntriesBatched instead.
-   */
-  android.system.keystore2.KeyDescriptor[] listEntries(in android.system.keystore2.Domain domain, in long nspace);
-  void deleteKey(in android.system.keystore2.KeyDescriptor key);
-  android.system.keystore2.KeyDescriptor grant(in android.system.keystore2.KeyDescriptor key, in int granteeUid, in int accessVector);
-  void ungrant(in android.system.keystore2.KeyDescriptor key, in int granteeUid);
-  int getNumberOfEntries(in android.system.keystore2.Domain domain, in long nspace);
-  android.system.keystore2.KeyDescriptor[] listEntriesBatched(in android.system.keystore2.Domain domain, in long nspace, in @nullable String startingPastAlias);
+@JavaDerive(equals=true, toString=true) @VintfStability
+parcelable AudioDeviceDescription {
+  android.media.audio.common.AudioDeviceType type = android.media.audio.common.AudioDeviceType.NONE;
+  @utf8InCpp String connection;
+  const @utf8InCpp String CONNECTION_ANALOG = "analog";
+  const @utf8InCpp String CONNECTION_BT_A2DP = "bt-a2dp";
+  const @utf8InCpp String CONNECTION_BT_LE = "bt-le";
+  const @utf8InCpp String CONNECTION_BT_SCO = "bt-sco";
+  const @utf8InCpp String CONNECTION_BUS = "bus";
+  const @utf8InCpp String CONNECTION_HDMI = "hdmi";
+  const @utf8InCpp String CONNECTION_HDMI_ARC = "hdmi-arc";
+  const @utf8InCpp String CONNECTION_HDMI_EARC = "hdmi-earc";
+  const @utf8InCpp String CONNECTION_IP_V4 = "ip-v4";
+  const @utf8InCpp String CONNECTION_SPDIF = "spdif";
+  const @utf8InCpp String CONNECTION_WIRELESS = "wireless";
+  const @utf8InCpp String CONNECTION_USB = "usb";
+  const @utf8InCpp String CONNECTION_VIRTUAL = "virtual";
 }

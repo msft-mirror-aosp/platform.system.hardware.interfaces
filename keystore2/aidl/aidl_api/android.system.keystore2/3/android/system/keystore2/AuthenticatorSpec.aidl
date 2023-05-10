@@ -1,11 +1,11 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright 2020, The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -34,17 +34,7 @@
 package android.system.keystore2;
 /* @hide */
 @VintfStability
-interface IKeystoreService {
-  android.system.keystore2.IKeystoreSecurityLevel getSecurityLevel(in android.hardware.security.keymint.SecurityLevel securityLevel);
-  android.system.keystore2.KeyEntryResponse getKeyEntry(in android.system.keystore2.KeyDescriptor key);
-  void updateSubcomponent(in android.system.keystore2.KeyDescriptor key, in @nullable byte[] publicCert, in @nullable byte[] certificateChain);
-  /**
-   * @deprecated use listEntriesBatched instead.
-   */
-  android.system.keystore2.KeyDescriptor[] listEntries(in android.system.keystore2.Domain domain, in long nspace);
-  void deleteKey(in android.system.keystore2.KeyDescriptor key);
-  android.system.keystore2.KeyDescriptor grant(in android.system.keystore2.KeyDescriptor key, in int granteeUid, in int accessVector);
-  void ungrant(in android.system.keystore2.KeyDescriptor key, in int granteeUid);
-  int getNumberOfEntries(in android.system.keystore2.Domain domain, in long nspace);
-  android.system.keystore2.KeyDescriptor[] listEntriesBatched(in android.system.keystore2.Domain domain, in long nspace, in @nullable String startingPastAlias);
+parcelable AuthenticatorSpec {
+  android.hardware.security.keymint.HardwareAuthenticatorType authenticatorType = android.hardware.security.keymint.HardwareAuthenticatorType.NONE;
+  long authenticatorId;
 }

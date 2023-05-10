@@ -31,20 +31,24 @@
 // with such a backward incompatible change, it has a high risk of breaking
 // later when a module using the interface is updated, e.g., Mainline modules.
 
-package android.system.keystore2;
+package android.media.audio.common;
 /* @hide */
-@VintfStability
-interface IKeystoreService {
-  android.system.keystore2.IKeystoreSecurityLevel getSecurityLevel(in android.hardware.security.keymint.SecurityLevel securityLevel);
-  android.system.keystore2.KeyEntryResponse getKeyEntry(in android.system.keystore2.KeyDescriptor key);
-  void updateSubcomponent(in android.system.keystore2.KeyDescriptor key, in @nullable byte[] publicCert, in @nullable byte[] certificateChain);
-  /**
-   * @deprecated use listEntriesBatched instead.
-   */
-  android.system.keystore2.KeyDescriptor[] listEntries(in android.system.keystore2.Domain domain, in long nspace);
-  void deleteKey(in android.system.keystore2.KeyDescriptor key);
-  android.system.keystore2.KeyDescriptor grant(in android.system.keystore2.KeyDescriptor key, in int granteeUid, in int accessVector);
-  void ungrant(in android.system.keystore2.KeyDescriptor key, in int granteeUid);
-  int getNumberOfEntries(in android.system.keystore2.Domain domain, in long nspace);
-  android.system.keystore2.KeyDescriptor[] listEntriesBatched(in android.system.keystore2.Domain domain, in long nspace, in @nullable String startingPastAlias);
+@Backing(type="int") @VintfStability
+enum AudioSource {
+  SYS_RESERVED_INVALID = (-1) /* -1 */,
+  DEFAULT = 0,
+  MIC = 1,
+  VOICE_UPLINK = 2,
+  VOICE_DOWNLINK = 3,
+  VOICE_CALL = 4,
+  CAMCORDER = 5,
+  VOICE_RECOGNITION = 6,
+  VOICE_COMMUNICATION = 7,
+  REMOTE_SUBMIX = 8,
+  UNPROCESSED = 9,
+  VOICE_PERFORMANCE = 10,
+  ECHO_REFERENCE = 1997,
+  FM_TUNER = 1998,
+  HOTWORD = 1999,
+  ULTRASOUND = 2000,
 }

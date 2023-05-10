@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,20 +31,24 @@
 // with such a backward incompatible change, it has a high risk of breaking
 // later when a module using the interface is updated, e.g., Mainline modules.
 
-package android.system.keystore2;
-/* @hide */
-@VintfStability
-interface IKeystoreService {
-  android.system.keystore2.IKeystoreSecurityLevel getSecurityLevel(in android.hardware.security.keymint.SecurityLevel securityLevel);
-  android.system.keystore2.KeyEntryResponse getKeyEntry(in android.system.keystore2.KeyDescriptor key);
-  void updateSubcomponent(in android.system.keystore2.KeyDescriptor key, in @nullable byte[] publicCert, in @nullable byte[] certificateChain);
-  /**
-   * @deprecated use listEntriesBatched instead.
-   */
-  android.system.keystore2.KeyDescriptor[] listEntries(in android.system.keystore2.Domain domain, in long nspace);
-  void deleteKey(in android.system.keystore2.KeyDescriptor key);
-  android.system.keystore2.KeyDescriptor grant(in android.system.keystore2.KeyDescriptor key, in int granteeUid, in int accessVector);
-  void ungrant(in android.system.keystore2.KeyDescriptor key, in int granteeUid);
-  int getNumberOfEntries(in android.system.keystore2.Domain domain, in long nspace);
-  android.system.keystore2.KeyDescriptor[] listEntriesBatched(in android.system.keystore2.Domain domain, in long nspace, in @nullable String startingPastAlias);
+package android.media.audio.common;
+@JavaDerive(equals=true, toString=true) @VintfStability
+parcelable AudioHalVolumeCurve {
+  android.media.audio.common.AudioHalVolumeCurve.DeviceCategory deviceCategory = android.media.audio.common.AudioHalVolumeCurve.DeviceCategory.SPEAKER;
+  android.media.audio.common.AudioHalVolumeCurve.CurvePoint[] curvePoints;
+  @Backing(type="byte") @VintfStability
+  enum DeviceCategory {
+    HEADSET = 0,
+    SPEAKER = 1,
+    EARPIECE = 2,
+    EXT_MEDIA = 3,
+    HEARING_AID = 4,
+  }
+  @VintfStability
+  parcelable CurvePoint {
+    byte index;
+    int attenuationMb;
+    const byte MIN_INDEX = 0;
+    const byte MAX_INDEX = 100;
+  }
 }

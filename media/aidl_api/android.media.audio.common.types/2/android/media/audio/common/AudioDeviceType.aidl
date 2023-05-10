@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,20 +31,41 @@
 // with such a backward incompatible change, it has a high risk of breaking
 // later when a module using the interface is updated, e.g., Mainline modules.
 
-package android.system.keystore2;
+package android.media.audio.common;
 /* @hide */
-@VintfStability
-interface IKeystoreService {
-  android.system.keystore2.IKeystoreSecurityLevel getSecurityLevel(in android.hardware.security.keymint.SecurityLevel securityLevel);
-  android.system.keystore2.KeyEntryResponse getKeyEntry(in android.system.keystore2.KeyDescriptor key);
-  void updateSubcomponent(in android.system.keystore2.KeyDescriptor key, in @nullable byte[] publicCert, in @nullable byte[] certificateChain);
-  /**
-   * @deprecated use listEntriesBatched instead.
-   */
-  android.system.keystore2.KeyDescriptor[] listEntries(in android.system.keystore2.Domain domain, in long nspace);
-  void deleteKey(in android.system.keystore2.KeyDescriptor key);
-  android.system.keystore2.KeyDescriptor grant(in android.system.keystore2.KeyDescriptor key, in int granteeUid, in int accessVector);
-  void ungrant(in android.system.keystore2.KeyDescriptor key, in int granteeUid);
-  int getNumberOfEntries(in android.system.keystore2.Domain domain, in long nspace);
-  android.system.keystore2.KeyDescriptor[] listEntriesBatched(in android.system.keystore2.Domain domain, in long nspace, in @nullable String startingPastAlias);
+@Backing(type="int") @VintfStability
+enum AudioDeviceType {
+  NONE = 0,
+  IN_DEFAULT = 1,
+  IN_ACCESSORY = 2,
+  IN_AFE_PROXY = 3,
+  IN_DEVICE = 4,
+  IN_ECHO_REFERENCE = 5,
+  IN_FM_TUNER = 6,
+  IN_HEADSET = 7,
+  IN_LOOPBACK = 8,
+  IN_MICROPHONE = 9,
+  IN_MICROPHONE_BACK = 10,
+  IN_SUBMIX = 11,
+  IN_TELEPHONY_RX = 12,
+  IN_TV_TUNER = 13,
+  IN_DOCK = 14,
+  OUT_DEFAULT = 129,
+  OUT_ACCESSORY = 130,
+  OUT_AFE_PROXY = 131,
+  OUT_CARKIT = 132,
+  OUT_DEVICE = 133,
+  OUT_ECHO_CANCELLER = 134,
+  OUT_FM = 135,
+  OUT_HEADPHONE = 136,
+  OUT_HEADSET = 137,
+  OUT_HEARING_AID = 138,
+  OUT_LINE_AUX = 139,
+  OUT_SPEAKER = 140,
+  OUT_SPEAKER_EARPIECE = 141,
+  OUT_SPEAKER_SAFE = 142,
+  OUT_SUBMIX = 143,
+  OUT_TELEPHONY_TX = 144,
+  OUT_DOCK = 145,
+  OUT_BROADCAST = 146,
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2019 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,20 +31,25 @@
 // with such a backward incompatible change, it has a high risk of breaking
 // later when a module using the interface is updated, e.g., Mainline modules.
 
-package android.system.keystore2;
+package android.media.audio.common;
 /* @hide */
-@VintfStability
-interface IKeystoreService {
-  android.system.keystore2.IKeystoreSecurityLevel getSecurityLevel(in android.hardware.security.keymint.SecurityLevel securityLevel);
-  android.system.keystore2.KeyEntryResponse getKeyEntry(in android.system.keystore2.KeyDescriptor key);
-  void updateSubcomponent(in android.system.keystore2.KeyDescriptor key, in @nullable byte[] publicCert, in @nullable byte[] certificateChain);
-  /**
-   * @deprecated use listEntriesBatched instead.
-   */
-  android.system.keystore2.KeyDescriptor[] listEntries(in android.system.keystore2.Domain domain, in long nspace);
-  void deleteKey(in android.system.keystore2.KeyDescriptor key);
-  android.system.keystore2.KeyDescriptor grant(in android.system.keystore2.KeyDescriptor key, in int granteeUid, in int accessVector);
-  void ungrant(in android.system.keystore2.KeyDescriptor key, in int granteeUid);
-  int getNumberOfEntries(in android.system.keystore2.Domain domain, in long nspace);
-  android.system.keystore2.KeyDescriptor[] listEntriesBatched(in android.system.keystore2.Domain domain, in long nspace, in @nullable String startingPastAlias);
+@Backing(type="int") @VintfStability
+enum AudioStreamType {
+  INVALID = (-2) /* -2 */,
+  SYS_RESERVED_DEFAULT = (-1) /* -1 */,
+  VOICE_CALL = 0,
+  SYSTEM = 1,
+  RING = 2,
+  MUSIC = 3,
+  ALARM = 4,
+  NOTIFICATION = 5,
+  BLUETOOTH_SCO = 6,
+  ENFORCED_AUDIBLE = 7,
+  DTMF = 8,
+  TTS = 9,
+  ACCESSIBILITY = 10,
+  ASSISTANT = 11,
+  SYS_RESERVED_REROUTING = 12,
+  SYS_RESERVED_PATCH = 13,
+  CALL_ASSISTANT = 14,
 }
