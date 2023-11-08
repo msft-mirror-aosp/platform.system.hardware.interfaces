@@ -44,6 +44,5 @@ parcelable AudioHalCapCriterionType {
      * string literals. These strings must only contain alphanumeric characters,
      * and the client must never attempt to parse them.
      */
-     @utf8InCpp String[] values;
+    @utf8InCpp String[] values;
 }
-

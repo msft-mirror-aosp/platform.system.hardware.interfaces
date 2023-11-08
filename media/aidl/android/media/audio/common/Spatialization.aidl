@@ -24,29 +24,29 @@ package android.media.audio.common;
 @JavaDerive(equals=true, toString=true)
 @VintfStability
 parcelable Spatialization {
-
     /**
-    * The spatialization level supported by the spatializer stage effect implementation.
-    * Used by methods of the ISpatializer interface.
-    * {@hide}
-    */
+     * The spatialization level supported by the spatializer stage effect implementation.
+     * Used by methods of the ISpatializer interface.
+     * {@hide}
+     */
     @Backing(type="byte")
     enum Level {
         /** Spatialization is disabled. */
         NONE = 0,
         /** The spatializer accepts audio with positional multichannel masks (e.g 5.1). */
         MULTICHANNEL = 1,
-        /** The spatializer accepts audio made of a channel bed of positional multichannels (e.g 5.1)
-        * and audio objects positioned independently via meta data.
-        */
+        /**
+         * The spatializer accepts audio made of a channel bed of positional multichannels
+         * (e.g 5.1) and audio objects positioned independently via meta data.
+         */
         BED_PLUS_OBJECTS = 2,
     }
 
     /**
-    * The spatialization mode supported by the spatializer stage effect implementation.
-    * Used by methods of the ISpatializer interface.
-    * {@hide}
-    */
+     * The spatialization mode supported by the spatializer stage effect implementation.
+     * Used by methods of the ISpatializer interface.
+     * {@hide}
+     */
     @Backing(type="byte")
     enum Mode {
         /** The spatializer supports binaural mode (over headphones type devices). */
@@ -54,5 +54,4 @@ parcelable Spatialization {
         /** The spatializer supports transaural mode (over speaker type devices). */
         TRANSAURAL = 1,
     }
-
 }

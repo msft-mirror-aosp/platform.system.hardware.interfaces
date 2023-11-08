@@ -16,8 +16,8 @@
 
 package android.media.audio.common;
 
-import android.media.audio.common.AudioStreamType;
 import android.media.audio.common.AudioAttributes;
+import android.media.audio.common.AudioStreamType;
 
 /**
  * AudioHalAttributesGroup associates an AudioHalVolumeGroup with an

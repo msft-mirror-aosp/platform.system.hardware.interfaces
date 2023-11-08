@@ -16,9 +16,9 @@
 
 package android.media.audio.common;
 
-import android.media.audio.common.AudioHalProductStrategy;
 import android.media.audio.common.AudioHalCapCriterion;
 import android.media.audio.common.AudioHalCapCriterionType;
+import android.media.audio.common.AudioHalProductStrategy;
 import android.media.audio.common.AudioHalVolumeGroup;
 import android.media.audio.common.AudioProductStrategyType;
 

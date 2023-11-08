@@ -20,19 +20,18 @@ package android.media.audio.common;
  * HeadTracking settings which can be used for Spatialization, including information of the user's
  * head position and orientation.
  *
- * These information can be used to update the view or content based on the user's head movement.
+ * This information can be used to update the view or content based on the user's head movement.
  *
  * {@hide}
  */
 @JavaDerive(equals=true, toString=true)
 @VintfStability
 parcelable HeadTracking {
-
     /**
-    * The head tracking mode supported by the spatializer effect implementation.
-    * Used by methods of the ISpatializer interface.
-    * {@hide}
-    */
+     * The head tracking mode supported by the spatializer effect implementation.
+     * Used by methods of the ISpatializer interface.
+     * {@hide}
+     */
     @Backing(type="byte")
     enum Mode {
         /**
@@ -55,5 +54,4 @@ parcelable HeadTracking {
          */
         RELATIVE_SCREEN = 3,
     }
-
 }
