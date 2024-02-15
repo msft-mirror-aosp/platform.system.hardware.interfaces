@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-package android.media.audio.common;
+#include <fuzzbinder/libbinder_driver.h>
 
-/**
- * This is an empty parcelable which can be used in unions to indicate
- * variants where the actual value of the field is irrelevant.
- *
- * {@hide}
- */
-@JavaDerive(equals=true, toString=true)
-@VintfStability
-@FixedSize
-parcelable Void {}
+#include "SuspendControlService.h"
+
+using ::android::fuzzService;
+using ::android::sp;
+using ::android::system::suspend::V1_0::SuspendControlServiceInternal;
+
+extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size) {
+    sp<SuspendControlServiceInternal> service = sp<SuspendControlServiceInternal>::make();
+    fuzzService(service, FuzzedDataProvider(data, size));
+    return 0;
+}

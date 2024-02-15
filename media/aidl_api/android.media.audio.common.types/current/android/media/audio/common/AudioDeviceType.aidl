@@ -33,7 +33,7 @@
 
 package android.media.audio.common;
 /* @hide */
-@Backing(type="int") @VintfStability
+@Backing(type="int") @SuppressWarnings(value={"redundant-name"}) @VintfStability
 enum AudioDeviceType {
   NONE = 0,
   IN_DEFAULT = 1,
@@ -50,6 +50,7 @@ enum AudioDeviceType {
   IN_TELEPHONY_RX = 12,
   IN_TV_TUNER = 13,
   IN_DOCK = 14,
+  IN_BUS = IN_DEVICE /* 4 */,
   OUT_DEFAULT = 129,
   OUT_ACCESSORY = 130,
   OUT_AFE_PROXY = 131,
@@ -68,4 +69,5 @@ enum AudioDeviceType {
   OUT_TELEPHONY_TX = 144,
   OUT_DOCK = 145,
   OUT_BROADCAST = 146,
+  OUT_BUS = OUT_DEVICE /* 133 */,
 }
