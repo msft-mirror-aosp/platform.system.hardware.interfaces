@@ -110,6 +110,9 @@ static const std::vector<uint8_t> kDerTestCert{
 class WifiLegacyKeystoreTest : public TestWithParam<std::string> {
    protected:
     void SetUp() override {
+        if (!isLegacyKeystoreEnabled()) {
+            GTEST_SKIP() << "Legacy Keystore is not fully supported";
+        }
         wifiKeystoreHal = IKeystore::getService(GetParam());
         ASSERT_TRUE(wifiKeystoreHal);
 
@@ -132,6 +135,11 @@ class WifiLegacyKeystoreTest : public TestWithParam<std::string> {
             return true;
         }
         return false;
+    }
+
+    bool isLegacyKeystoreEnabled() {
+        // Legacy Keystore is partly deprecated after Android U
+        return property_get_int32("ro.board.api_level", 0) <= __ANDROID_API_U__;
     }
 
     sp<IKeystore> wifiKeystoreHal;
