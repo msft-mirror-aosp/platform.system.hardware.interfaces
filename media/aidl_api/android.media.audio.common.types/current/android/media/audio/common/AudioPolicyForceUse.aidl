@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,17 +33,14 @@
 
 package android.media.audio.common;
 /* @hide */
-@JavaDerive(equals=true, toString=true) @VintfStability
-parcelable AudioHalEngineConfig {
-  int defaultProductStrategyId = android.media.audio.common.AudioProductStrategyType.SYS_RESERVED_NONE /* -1 */;
-  android.media.audio.common.AudioHalProductStrategy[] productStrategies;
-  android.media.audio.common.AudioHalVolumeGroup[] volumeGroups;
-  @nullable android.media.audio.common.AudioHalEngineConfig.CapSpecificConfig capSpecificConfig;
-  @VintfStability
-  parcelable CapSpecificConfig {
-    android.media.audio.common.AudioHalCapCriterion[] criteria;
-    android.media.audio.common.AudioHalCapCriterionType[] criterionTypes;
-    @nullable android.media.audio.common.AudioHalCapCriterionV2[] criteriaV2;
-    @nullable android.media.audio.common.AudioHalCapDomain[] domains;
-  }
+@Backing(type="int") @SuppressWarnings(value={"redundant-name"}) @VintfStability
+enum AudioPolicyForceUse {
+  COMMUNICATION = 0,
+  MEDIA = 1,
+  RECORD = 2,
+  DOCK = 3,
+  SYSTEM = 4,
+  HDMI_SYSTEM_AUDIO = 5,
+  ENCODED_SURROUND = 6,
+  VIBRATE_RINGING = 7,
 }
