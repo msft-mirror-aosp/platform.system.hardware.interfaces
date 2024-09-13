@@ -131,14 +131,34 @@ WakeLockEntryList::WakeLockEntryList(size_t capacity, unique_fd kernelWakelockSt
  * Evicts LRU from back of list if stats is at capacity.
  */
 void WakeLockEntryList::evictIfFull() {
+    static std::chrono::steady_clock::time_point lastWarningTime{};
+    static std::chrono::steady_clock::time_point lastEvictionTime{};
+    static long evictionCountSinceLastLog = 0;
+
     if (mStats.size() == mCapacity) {
         auto evictIt = mStats.end();
         std::advance(evictIt, -1);
         auto evictKey = std::make_pair(evictIt->name, evictIt->pid);
         mLookupTable.erase(evictKey);
         mStats.erase(evictIt);
-        LOG(ERROR) << "WakeLock Stats: Stats capacity met, consider adjusting capacity to "
-                      "avoid stats eviction.";
+
+        std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
+        long long secondsSinceLastLog =
+            std::chrono::duration_cast<std::chrono::seconds>(now - lastWarningTime).count();
+        evictionCountSinceLastLog++;
+
+        if (secondsSinceLastLog >= 5) {
+            long long secondsSinceLastEvict =
+                std::chrono::duration_cast<std::chrono::seconds>(now - lastEvictionTime).count();
+            LOG(WARNING) << "WakeLock Stats: Stats capacity met " << evictionCountSinceLastLog
+                         << " time(s) since last warning (" << secondsSinceLastLog
+                         << " seconds ago). An eviction is occurring now, with the previous"
+                         << " eviction occurring " << secondsSinceLastEvict
+                         << " seconds ago. Consider adjusting capacity to avoid stats eviction.";
+            lastWarningTime = now;
+            evictionCountSinceLastLog = 0; // Reset the count
+        }
+        lastEvictionTime = now;
     }
 }
 
