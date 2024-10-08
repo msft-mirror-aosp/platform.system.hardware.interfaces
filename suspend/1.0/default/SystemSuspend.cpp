@@ -23,6 +23,7 @@
 #include <aidl/android/system/suspend/IWakeLock.h>
 #include <android-base/file.h>
 #include <android-base/logging.h>
+#include <android-base/parseint.h>
 #include <android-base/properties.h>
 #include <android-base/stringprintf.h>
 #include <android-base/strings.h>
@@ -42,6 +43,7 @@ using ::aidl::android::system::suspend::IWakeLock;
 using ::aidl::android::system::suspend::WakeLockType;
 using ::android::base::CachedProperty;
 using ::android::base::Error;
+using ::android::base::ParseInt;
 using ::android::base::ReadFdToString;
 using ::android::base::StringPrintf;
 using ::android::base::WriteStringToFd;
@@ -594,7 +596,11 @@ Result<SuspendStats> SystemSuspend::getSuspendStats() {
         } else if (statName == "last_failed_step") {
             stats.lastFailedStep = valStr;
         } else {
-            int statVal = std::stoi(valStr);
+            int statVal = -1;
+            bool parseSuccess = ParseInt(valStr, &statVal);
+            if (!parseSuccess) {
+                LOG(ERROR) << "Failed to parse " << statName << ", val: " << valStr;
+            }
             if (statName == "success") {
                 stats.success = statVal;
             } else if (statName == "fail") {
@@ -616,7 +622,9 @@ Result<SuspendStats> SystemSuspend::getSuspendStats() {
             } else if (statName == "failed_resume_noirq") {
                 stats.failedResumeNoirq = statVal;
             } else if (statName == "last_failed_errno") {
-                stats.lastFailedErrno = statVal;
+                // `errno` will only be negative numbers or 0, so a positive number would
+                // indicate a parsing failure.
+                stats.lastFailedErrno = parseSuccess ? statVal : 1;
             }
         }
     }
