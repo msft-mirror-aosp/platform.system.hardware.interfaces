@@ -67,6 +67,11 @@ cc_defaults {
     ],
 }
 
+vintf_fragment {
+    name: "android.system.suspend-service.xml",
+    src: "android.system.suspend-service.xml",
+}
+
 cc_binary {
     name: "android.system.suspend-service",
     relative_install_path: "hw",
@@ -74,7 +79,7 @@ cc_binary {
         "android.system.suspend-service_defaults",
     ],
     init_rc: ["android.system.suspend-service.rc"],
-    vintf_fragments: ["android.system.suspend-service.xml"],
+    vintf_fragment_modules: ["android.system.suspend-service.xml"],
     srcs: [
         "main.cpp",
     ],
