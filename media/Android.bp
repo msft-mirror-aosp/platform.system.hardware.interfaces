@@ -94,6 +94,7 @@ aidl_interface {
         "aidl/android/media/audio/common/MicrophoneDynamicInfo.aidl",
         "aidl/android/media/audio/common/MicrophoneInfo.aidl",
         "aidl/android/media/audio/common/PcmType.aidl",
+        "aidl/android/media/audio/common/SoundClassification.aidl",
         "aidl/android/media/audio/common/Spatialization.aidl",
         "aidl/android/media/audio/common/Void.aidl",
     ],
