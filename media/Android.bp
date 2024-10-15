@@ -124,6 +124,9 @@ aidl_interface {
                 "com.android.btservices",
             ],
         },
+        rust: {
+            enabled: true,
+        },
     },
     versions_with_info: [
         {
@@ -209,6 +212,13 @@ cc_defaults {
             ],
         },
     },
+}
+
+rust_defaults {
+    name: "latest_android_media_audio_common_types_rust",
+    rustlibs: [
+        latest_android_media_audio_common_types + "-rust",
+    ],
 }
 
 aidl_interface_defaults {
