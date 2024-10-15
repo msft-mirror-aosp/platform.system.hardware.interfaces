@@ -19,6 +19,7 @@ aidl_interface {
 aidl_interface {
     name: "android.system.suspend.control",
     local_include_dir: ".",
+    frozen: true,
     srcs: [
         "android/system/suspend/ISuspendControlService.aidl",
         "android/system/suspend/ISuspendCallback.aidl",
