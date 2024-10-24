@@ -1118,8 +1118,10 @@ class SystemSuspendSameThreadTest : public ::testing::Test {
                          int64_t failedSuspendLate = 42, int64_t failedSuspendNoirq = 42,
                          int64_t failedResume = 42, int64_t failedResumeEarly = 42,
                          int64_t failedResumeNoirq = 42,
-                         const std::string& lastFailedDev = "fakeDev", int64_t lastFailedErrno = 42,
-                         const std::string& lastFailedStep = "fakeStep") {
+                         const std::string& lastFailedDev = "fakeDev",
+                         int64_t lastFailedErrno = -42,
+                         const std::string& lastFailedStep = "fakeStep", uint64_t lastHwSleep = 42,
+                         uint64_t totalHwSleep = 42, uint64_t maxHwSleep = 523986009990) {
         int fd = suspendStatsFd.get();
 
         return writeStatToFile(fd, "success", success) && writeStatToFile(fd, "fail", fail) &&
@@ -1133,7 +1135,10 @@ class SystemSuspendSameThreadTest : public ::testing::Test {
                writeStatToFile(fd, "failed_resume_noirq", failedResumeNoirq) &&
                writeStatToFile(fd, "last_failed_dev", lastFailedDev) &&
                writeStatToFile(fd, "last_failed_errno", lastFailedErrno) &&
-               writeStatToFile(fd, "last_failed_step", lastFailedStep);
+               writeStatToFile(fd, "last_failed_step", lastFailedStep) &&
+               writeStatToFile(fd, "last_hw_sleep", lastHwSleep) &&
+               writeStatToFile(fd, "total_hw_sleep", totalHwSleep) &&
+               writeStatToFile(fd, "max_hw_sleep", maxHwSleep);
     }
 
     bool removeDirectoryEntry(const std::string& path) {
@@ -1484,8 +1489,11 @@ TEST_F(SystemSuspendSameThreadTest, GetSuspendStats) {
     ASSERT_EQ(stats.failedResumeEarly, 42);
     ASSERT_EQ(stats.failedResumeNoirq, 42);
     ASSERT_EQ(stats.lastFailedDev, "fakeDev");
-    ASSERT_EQ(stats.lastFailedErrno, 42);
+    ASSERT_EQ(stats.lastFailedErrno, -42);
     ASSERT_EQ(stats.lastFailedStep, "fakeStep");
+    ASSERT_EQ(stats.lastHwSleep, 42);
+    ASSERT_EQ(stats.totalHwSleep, 42);
+    ASSERT_EQ(stats.maxHwSleep, 523986009990);
 }
 
 class SuspendWakeupTest : public ::testing::Test {
