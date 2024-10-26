@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.media.audio.common;
+package android.media.audio.eraser;
 
 /**
  * The sound classification is based on the top-level categories of the "AudioSet ontology".
@@ -67,4 +67,9 @@ enum SoundClassification {
      * foreground or target objects.
      */
     ENVIRONMENT,
+
+    /**
+     * Vendor customizable extension, for possible classifications not listed above.
+     */
+    VENDOR_EXTENSION,
 }

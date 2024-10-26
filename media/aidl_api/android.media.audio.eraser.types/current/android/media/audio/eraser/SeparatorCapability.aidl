@@ -31,14 +31,10 @@
 // with such a backward incompatible change, it has a high risk of breaking
 // later when a module using the interface is updated, e.g., Mainline modules.
 
-package android.media.audio.common;
-@Backing(type="int") @JavaDerive(equals=true, toString=true) @VintfStability
-enum SoundClassification {
-  HUMAN,
-  ANIMAL,
-  NATURE,
-  MUSIC,
-  THINGS,
-  AMBIGUOUS,
-  ENVIRONMENT,
+package android.media.audio.eraser;
+@JavaDerive(equals=true, toString=true) @VintfStability
+parcelable SeparatorCapability {
+  boolean supported;
+  int maxSoundSources = 4;
+  const int MIN_SOUND_SOURCE_SUPPORTED = 2;
 }
