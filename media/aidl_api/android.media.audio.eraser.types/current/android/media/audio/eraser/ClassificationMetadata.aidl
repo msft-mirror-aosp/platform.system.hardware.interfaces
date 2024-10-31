@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,32 +31,9 @@
 // with such a backward incompatible change, it has a high risk of breaking
 // later when a module using the interface is updated, e.g., Mainline modules.
 
-package android.media.audio.common;
-/* @hide */
-@Backing(type="int") @VintfStability
-enum AudioUsage {
-  INVALID = (-1) /* -1 */,
-  UNKNOWN = 0,
-  MEDIA = 1,
-  VOICE_COMMUNICATION = 2,
-  VOICE_COMMUNICATION_SIGNALLING = 3,
-  ALARM = 4,
-  NOTIFICATION = 5,
-  NOTIFICATION_TELEPHONY_RINGTONE = 6,
-  SYS_RESERVED_NOTIFICATION_COMMUNICATION_REQUEST = 7,
-  SYS_RESERVED_NOTIFICATION_COMMUNICATION_INSTANT = 8,
-  SYS_RESERVED_NOTIFICATION_COMMUNICATION_DELAYED = 9,
-  NOTIFICATION_EVENT = 10,
-  ASSISTANCE_ACCESSIBILITY = 11,
-  ASSISTANCE_NAVIGATION_GUIDANCE = 12,
-  ASSISTANCE_SONIFICATION = 13,
-  GAME = 14,
-  VIRTUAL_SOURCE = 15,
-  ASSISTANT = 16,
-  CALL_ASSISTANT = 17,
-  EMERGENCY = 1000,
-  SAFETY = 1001,
-  VEHICLE_STATUS = 1002,
-  ANNOUNCEMENT = 1003,
-  SPEAKER_CLEANUP = 1004,
+package android.media.audio.eraser;
+@JavaDerive(equals=true, toString=true) @VintfStability
+parcelable ClassificationMetadata {
+  float confidenceScore;
+  android.media.audio.eraser.Classification classification;
 }
