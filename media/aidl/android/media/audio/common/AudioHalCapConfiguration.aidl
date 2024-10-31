@@ -37,7 +37,7 @@ import android.media.audio.common.AudioHalCapRule;
  *                            └──────────────────────────┘ ┌───►                               │  │
  *                                                         │   │ name                          │  │
  *                            ┌──────────────────────────┐ │  ┌┼─rule                          │  │
- *                            │    AudioHalCapComain     │ │  ││ parameterSettings[]───────────┼──┘
+ *                            │    AudioHalCapDomain     │ │  ││ parameterSettings[]───────────┼──┘
  *                            │                          │ │  │└───────────────────────────────┘
  *                         ┌──►name                      │ │  │
  *                         │  │configurations[]──────────┼─┘  │┌───────────────────────────────┐
