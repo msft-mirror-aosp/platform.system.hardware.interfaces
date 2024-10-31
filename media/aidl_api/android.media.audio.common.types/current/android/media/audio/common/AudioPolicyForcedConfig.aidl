@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,30 +33,23 @@
 
 package android.media.audio.common;
 /* @hide */
-@Backing(type="int") @VintfStability
-enum AudioUsage {
-  INVALID = (-1) /* -1 */,
-  UNKNOWN = 0,
-  MEDIA = 1,
-  VOICE_COMMUNICATION = 2,
-  VOICE_COMMUNICATION_SIGNALLING = 3,
-  ALARM = 4,
-  NOTIFICATION = 5,
-  NOTIFICATION_TELEPHONY_RINGTONE = 6,
-  SYS_RESERVED_NOTIFICATION_COMMUNICATION_REQUEST = 7,
-  SYS_RESERVED_NOTIFICATION_COMMUNICATION_INSTANT = 8,
-  SYS_RESERVED_NOTIFICATION_COMMUNICATION_DELAYED = 9,
-  NOTIFICATION_EVENT = 10,
-  ASSISTANCE_ACCESSIBILITY = 11,
-  ASSISTANCE_NAVIGATION_GUIDANCE = 12,
-  ASSISTANCE_SONIFICATION = 13,
-  GAME = 14,
-  VIRTUAL_SOURCE = 15,
-  ASSISTANT = 16,
-  CALL_ASSISTANT = 17,
-  EMERGENCY = 1000,
-  SAFETY = 1001,
-  VEHICLE_STATUS = 1002,
-  ANNOUNCEMENT = 1003,
-  SPEAKER_CLEANUP = 1004,
+@Backing(type="int") @SuppressWarnings(value={"redundant-name"}) @VintfStability
+enum AudioPolicyForcedConfig {
+  NONE = 0,
+  SPEAKER = 1,
+  HEADPHONES = 2,
+  BT_SCO = 3,
+  BT_A2DP = 4,
+  WIRED_ACCESSORY = 5,
+  BT_CAR_DOCK = 6,
+  BT_DESK_DOCK = 7,
+  ANALOG_DOCK = 8,
+  DIGITAL_DOCK = 9,
+  NO_BT_A2DP = 10,
+  SYSTEM_ENFORCED = 11,
+  HDMI_SYSTEM_AUDIO_ENFORCED = 12,
+  ENCODED_SURROUND_NEVER = 13,
+  ENCODED_SURROUND_ALWAYS = 14,
+  ENCODED_SURROUND_MANUAL = 15,
+  BT_BLE = 16,
 }
