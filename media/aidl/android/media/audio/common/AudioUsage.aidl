@@ -138,9 +138,4 @@ enum AudioUsage {
      * Usage value to use when the usage is an announcement.
      */
     ANNOUNCEMENT = 1003,
-    /**
-     * Usage value to use when the usage is to clean up the speaker
-     * transducers and free them of deposits of dust or water
-     */
-    SPEAKER_CLEANUP = 1004,
 }
