@@ -42,7 +42,7 @@ union AudioHalCapCriterionV2 {
   android.media.audio.common.AudioHalCapCriterionV2.TelephonyMode telephonyMode;
   android.media.audio.common.AudioHalCapCriterionV2.ForceConfigForUse forceConfigForUse;
   android.media.audio.common.AudioHalCapCriterionV2.Type type;
-  @VintfStability
+  @Backing(type="byte") @VintfStability
   enum LogicalDisjunction {
     EXCLUSIVE = 0,
     INCLUSIVE,
