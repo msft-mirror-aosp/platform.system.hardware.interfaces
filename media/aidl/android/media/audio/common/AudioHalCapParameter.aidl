@@ -23,17 +23,36 @@ import android.media.audio.common.AudioSource;
 import android.media.audio.common.AudioStreamType;
 
 /**
- * Defines the audio Cap Engine Parameters expected to be controlled by the configurable engine.
+ * Defines the audio CAP Engine Parameters expected to be controlled by the configurable engine.
  * These parameters deal with:
- *    Volume Profile: for volume curve selection (e.g. dtmf follows call curves during call).
  *    Output/Input device selection for a given strategy based on:
- *        -the type (each device will be a bit in a bitfield, allowing to select multiple devices).
- *        -the address
+ *        -the type (each device will be a bit in a bitfield, allowing to select multiple devices);
+ *        -the address.
+ *    Volume Profile: for volume curve selection (e.g. dtmf follows call curves during call).
  *
  * {@hide}
  */
 @VintfStability
 union AudioHalCapParameter {
+    @VintfStability
+    parcelable StrategyDevice {
+        AudioDeviceDescription device;
+        // AudioHalProductStrategy.id
+        int id = AudioProductStrategyType.SYS_RESERVED_NONE;
+        /**
+         * Specifies whether the device is selected or not selected in the configuration.
+         */
+        boolean isSelected;
+    }
+    @VintfStability
+    parcelable InputSourceDevice {
+        AudioDeviceDescription device;
+        AudioSource inputSource = AudioSource.DEFAULT;
+        /**
+         * Specifies whether the device is selected or not selected in the configuration.
+         */
+        boolean isSelected;
+    }
     @VintfStability
     parcelable StrategyDeviceAddress {
         AudioDeviceAddress deviceAddress;
@@ -41,26 +60,27 @@ union AudioHalCapParameter {
         int id = AudioProductStrategyType.SYS_RESERVED_NONE;
     }
     @VintfStability
-    parcelable StrategyDevice {
-        AudioDeviceDescription device;
-        // AudioHalProductStrategy.id
-        int id = AudioProductStrategyType.SYS_RESERVED_NONE;
-        boolean isSelected;
-    }
-    @VintfStability
-    parcelable InputSourceDevice {
-        AudioDeviceDescription device;
-        AudioSource inputSource = AudioSource.DEFAULT;
-        boolean isSelected;
-    }
-    @VintfStability
     parcelable StreamVolumeProfile {
         AudioStreamType stream = AudioStreamType.INVALID;
         AudioStreamType profile = AudioStreamType.INVALID;
     }
 
+    /**
+     * Parameter allowing to choose a device by its type and associate
+     * the choice with a product strategy.
+     */
     StrategyDevice selectedStrategyDevice;
-    StrategyDeviceAddress strategyDeviceAddress;
+    /**
+     * Parameter allowing to choose an input device by and source type.
+     */
     InputSourceDevice selectedInputSourceDevice;
+    /**
+     * Parameter allowing to choose a particular device by its address and
+     * associate the choice with a product strategy.
+     */
+    StrategyDeviceAddress strategyDeviceAddress;
+    /**
+     * Parameter dealing with volume curve selection.
+     */
     StreamVolumeProfile streamVolumeProfile;
 }
