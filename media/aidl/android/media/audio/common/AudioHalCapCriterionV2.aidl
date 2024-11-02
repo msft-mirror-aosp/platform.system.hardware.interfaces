@@ -36,6 +36,7 @@ union AudioHalCapCriterionV2 {
      * bitfield, it can have several values). Rules expected on inclusive or exclusive will be
      * different.
      */
+    @Backing(type="byte")
     @VintfStability
     enum LogicalDisjunction {
         EXCLUSIVE = 0,

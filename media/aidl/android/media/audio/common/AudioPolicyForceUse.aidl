@@ -16,7 +16,8 @@
 package android.media.audio.common;
 
 /**
- * List of usages to be used in addition to forced config in order to force the audio routing.
+ * List of usages to be used the values from 'AudioPolicyForcedConfig' in order
+ * to force audio routing.
  *
  * {@hide}
  */
@@ -24,12 +25,39 @@ package android.media.audio.common;
 @SuppressWarnings(value={"redundant-name"})
 @VintfStability
 enum AudioPolicyForceUse {
+    /**
+     * Configures the audio device used for "communication" (telephony, VoIP) use cases.
+     */
     COMMUNICATION = 0,
+    /**
+     * Configures the audio device used for media playback.
+     */
     MEDIA = 1,
+    /**
+     * Configures the audio device used for recording.
+     */
     RECORD = 2,
+    /**
+     * Specifies whether the phone is currently placed into a dock. The value of
+     * 'AudioPolicyForcedConfig' specifies the kind of the dock.
+     */
     DOCK = 3,
+    /**
+     * Specifies whether enforcing of certain sounds is enabled, for example,
+     * enforcing of the camera shutter sound.
+     */
     SYSTEM = 4,
+    /**
+     * Specifies whether sending of system audio via HDMI is enabled.
+     */
     HDMI_SYSTEM_AUDIO = 5,
+    /**
+     * Configures whether support for encoded surround formats is enabled for
+     * applications.
+     */
     ENCODED_SURROUND = 6,
+    /**
+     * Configures whether in muted audio mode ringing should also be sent to a BT device.
+     */
     VIBRATE_RINGING = 7,
 }
