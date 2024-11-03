@@ -70,4 +70,5 @@ enum AudioDeviceType {
   OUT_DOCK = 145,
   OUT_BROADCAST = 146,
   OUT_BUS = OUT_DEVICE /* 133 */,
+  OUT_MULTICHANNEL_GROUP = 147,
 }

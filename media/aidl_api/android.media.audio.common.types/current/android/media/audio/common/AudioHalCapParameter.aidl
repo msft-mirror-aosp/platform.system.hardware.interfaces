@@ -36,14 +36,9 @@ package android.media.audio.common;
 @VintfStability
 union AudioHalCapParameter {
   android.media.audio.common.AudioHalCapParameter.StrategyDevice selectedStrategyDevice;
-  android.media.audio.common.AudioHalCapParameter.StrategyDeviceAddress strategyDeviceAddress;
   android.media.audio.common.AudioHalCapParameter.InputSourceDevice selectedInputSourceDevice;
+  android.media.audio.common.AudioHalCapParameter.StrategyDeviceAddress strategyDeviceAddress;
   android.media.audio.common.AudioHalCapParameter.StreamVolumeProfile streamVolumeProfile;
-  @VintfStability
-  parcelable StrategyDeviceAddress {
-    android.media.audio.common.AudioDeviceAddress deviceAddress;
-    int id = android.media.audio.common.AudioProductStrategyType.SYS_RESERVED_NONE /* -1 */;
-  }
   @VintfStability
   parcelable StrategyDevice {
     android.media.audio.common.AudioDeviceDescription device;
@@ -55,6 +50,11 @@ union AudioHalCapParameter {
     android.media.audio.common.AudioDeviceDescription device;
     android.media.audio.common.AudioSource inputSource = android.media.audio.common.AudioSource.DEFAULT;
     boolean isSelected;
+  }
+  @VintfStability
+  parcelable StrategyDeviceAddress {
+    android.media.audio.common.AudioDeviceAddress deviceAddress;
+    int id = android.media.audio.common.AudioProductStrategyType.SYS_RESERVED_NONE /* -1 */;
   }
   @VintfStability
   parcelable StreamVolumeProfile {
