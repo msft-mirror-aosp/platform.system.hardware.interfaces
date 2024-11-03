@@ -28,8 +28,7 @@ import android.media.audio.common.AudioHalCapConfiguration;
 @VintfStability
 parcelable AudioHalCapDomain {
     /**
-     * Name of the configurable domain. It must be unique for the given instance of parameter
-     * framework.
+     * Name of the configurable domain. It must be unique within the CAP configuration.
      */
     @utf8InCpp String name;
     /**
