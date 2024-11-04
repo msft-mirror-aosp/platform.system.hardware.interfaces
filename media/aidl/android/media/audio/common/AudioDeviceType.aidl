@@ -192,4 +192,12 @@ enum AudioDeviceType {
      * See the note on `IN_BUS` for details.
      */
     OUT_BUS = OUT_DEVICE,
+    /**
+     * Output to a wireless speaker group supporting multichannel contents. The
+     * speakers in the group are connected together using local network based
+     * protocols. The speaker group requires additional input of the physical
+     * positions of each individual speaker to provide a better experience on
+     * multichannel contents.
+     */
+    OUT_MULTICHANNEL_GROUP = 147,
 }
