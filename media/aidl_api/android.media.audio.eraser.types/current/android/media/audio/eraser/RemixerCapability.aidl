@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,15 +31,10 @@
 // with such a backward incompatible change, it has a high risk of breaking
 // later when a module using the interface is updated, e.g., Mainline modules.
 
-package android.media.audio.common;
-/* @hide */
-@JavaDerive(equals=true, toString=true) @SuppressWarnings(value={"redundant-name"}) @VintfStability
-parcelable AudioPortDeviceExt {
-  android.media.audio.common.AudioDevice device;
-  int flags;
-  android.media.audio.common.AudioFormatDescription[] encodedFormats;
-  int encapsulationModes;
-  int encapsulationMetadataTypes;
-  @nullable android.media.audio.common.AudioChannelLayout speakerLayout;
-  const int FLAG_INDEX_DEFAULT_DEVICE = 0;
+package android.media.audio.eraser;
+@JavaDerive(equals=true, toString=true) @VintfStability
+parcelable RemixerCapability {
+  boolean supported;
+  float minGainFactor = 0f;
+  float maxGainFactor = 1f;
 }
