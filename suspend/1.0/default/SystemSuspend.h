@@ -59,6 +59,9 @@ struct SuspendStats {
     std::string lastFailedDev;
     int lastFailedErrno = 0;
     std::string lastFailedStep;
+    uint64_t lastHwSleep = 0;
+    uint64_t totalHwSleep = 0;
+    uint64_t maxHwSleep = 0;
 };
 
 struct SleepTimeConfig {
