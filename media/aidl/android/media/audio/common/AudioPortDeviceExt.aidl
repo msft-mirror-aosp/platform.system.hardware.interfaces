@@ -16,6 +16,7 @@
 
 package android.media.audio.common;
 
+import android.media.audio.common.AudioChannelLayout;
 import android.media.audio.common.AudioDevice;
 import android.media.audio.common.AudioFormatDescription;
 
@@ -59,4 +60,16 @@ parcelable AudioPortDeviceExt {
      * default device port in a HAL module in each I/O direction.
      */
     const int FLAG_INDEX_DEFAULT_DEVICE = 0;
+
+    /**
+     * A channel layout that represents the physical layout of output speakers.
+     *
+     * If set, only the `layoutMask` variant of AudioChannelLayout is valid and
+     * supported for this field.
+     *
+     * The layoutMask only indicates which speaker channels are present, the
+     * physical layout of the speakers should be informed by a standard for
+     * multi-channel sound playback systems, such as ITU-R BS.2051.
+     */
+    @nullable AudioChannelLayout speakerLayout;
 }
