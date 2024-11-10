@@ -70,6 +70,10 @@ union AudioHalCapCriterionV2 {
         /** Logic followed by this criterion, only one value at given time. */
         LogicalDisjunction logic = LogicalDisjunction.EXCLUSIVE;
     }
+    /**
+     * Available device type criterion. It is used to force routing when an input or
+     * output device of a certain type is available.
+     */
     @VintfStability
     parcelable AvailableDevices {
         /** List if supported values (aka audio devices) by this criterion. */
@@ -77,6 +81,10 @@ union AudioHalCapCriterionV2 {
         /** Logic followed by this criterion, multiple devices can be selected/available. */
         LogicalDisjunction logic = LogicalDisjunction.INCLUSIVE;
     }
+    /**
+     * Available device with a certain address criterion. It is used to force routing
+     * when an input or output device at the certain address is available.
+     */
     @VintfStability
     parcelable AvailableDevicesAddresses {
         /** List if supported values (aka audio device addresses) by this criterion. */
@@ -84,22 +92,11 @@ union AudioHalCapCriterionV2 {
         /** Logic followed by this criterion, multiple device addresses can be available. */
         LogicalDisjunction logic = LogicalDisjunction.INCLUSIVE;
     }
+
     AvailableDevices availableInputDevices;
     AvailableDevices availableOutputDevices;
     AvailableDevicesAddresses availableInputDevicesAddresses;
     AvailableDevicesAddresses availableOutputDevicesAddresses;
     TelephonyMode telephonyMode;
     ForceConfigForUse forceConfigForUse;
-
-    /**
-     * Supported criterion types for Configurable Audio Policy Engine.
-     */
-    @VintfStability
-    union Type {
-        AudioDeviceDescription availableDevicesType;
-        AudioDeviceAddress availableDevicesAddressesType;
-        AudioMode telephonyModeType;
-        AudioPolicyForcedConfig forcedConfigType;
-    }
-    Type type;
 }
