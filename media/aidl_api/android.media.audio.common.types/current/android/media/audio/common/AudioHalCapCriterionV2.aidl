@@ -48,8 +48,9 @@ union AudioHalCapCriterionV2 {
   }
   @VintfStability
   parcelable ForceConfigForUse {
-    android.media.audio.common.AudioPolicyForceUse[] values;
-    android.media.audio.common.AudioPolicyForceUse defaultValue;
+    android.media.audio.common.AudioPolicyForceUse forceUse = android.media.audio.common.AudioPolicyForceUse.MEDIA;
+    android.media.audio.common.AudioPolicyForcedConfig[] values;
+    android.media.audio.common.AudioPolicyForcedConfig defaultValue = android.media.audio.common.AudioPolicyForcedConfig.NONE;
     android.media.audio.common.AudioHalCapCriterionV2.LogicalDisjunction logic = android.media.audio.common.AudioHalCapCriterionV2.LogicalDisjunction.EXCLUSIVE;
   }
   @VintfStability

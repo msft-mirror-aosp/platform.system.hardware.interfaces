@@ -20,6 +20,7 @@ import android.media.audio.common.AudioDeviceAddress;
 import android.media.audio.common.AudioDeviceDescription;
 import android.media.audio.common.AudioMode;
 import android.media.audio.common.AudioPolicyForceUse;
+import android.media.audio.common.AudioPolicyForcedConfig;
 
 /**
  * AudioHalCapCriterion is a wrapper for a CriterionType and its default value.
@@ -47,13 +48,12 @@ union AudioHalCapCriterionV2 {
      */
     @VintfStability
     parcelable ForceConfigForUse {
+        /**  Force usage addressed by this criterion. */
+        AudioPolicyForceUse forceUse = AudioPolicyForceUse.MEDIA;
         /** List of supported value by this criterion. */
-        AudioPolicyForceUse[] values;
-        /**
-         * Default configuration applied if none is provided. This is the default-initialized
-         * value of 'AudioPolicyForceUse' which is 'forMedia = NONE'.
-         */
-        AudioPolicyForceUse defaultValue;
+        AudioPolicyForcedConfig[] values;
+        /** Default configuration applied if none is provided. */
+        AudioPolicyForcedConfig defaultValue = AudioPolicyForcedConfig.NONE;
         /** Logic followed by this criterion, only one value at given time. */
         LogicalDisjunction logic = LogicalDisjunction.EXCLUSIVE;
     }

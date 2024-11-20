@@ -16,92 +16,48 @@
 package android.media.audio.common;
 
 /**
- * "Force Use" specifies high-level routing policies which are used
- * in order to override the usual routing behavior.
+ * List of usages to be used the values from 'AudioPolicyForcedConfig' in order
+ * to force audio routing.
  *
  * {@hide}
  */
+@Backing(type="int")
 @SuppressWarnings(value={"redundant-name"})
 @VintfStability
-union AudioPolicyForceUse {
-    @Backing(type="byte")
-    @VintfStability
-    enum CommunicationDeviceCategory {
-        NONE = 0,
-        SPEAKER,
-        BT_SCO,
-        BT_BLE,
-        WIRED_ACCESSORY,
-    }
-    @Backing(type="byte")
-    @VintfStability
-    enum MediaDeviceCategory {
-        NONE = 0,
-        SPEAKER,
-        HEADPHONES,
-        BT_A2DP,
-        ANALOG_DOCK,
-        DIGITAL_DOCK,
-        WIRED_ACCESSORY,
-        NO_BT_A2DP,
-    }
-    @Backing(type="byte")
-    @VintfStability
-    enum DockType {
-        NONE = 0,
-        BT_CAR_DOCK,
-        BT_DESK_DOCK,
-        ANALOG_DOCK,
-        DIGITAL_DOCK,
-        WIRED_ACCESSORY,
-    }
-    @Backing(type="byte")
-    @VintfStability
-    enum EncodedSurroundConfig {
-        UNSPECIFIED = 0,
-        NEVER,
-        ALWAYS,
-        MANUAL,
-    }
-
-    /**
-     * Configures the audio device used for media playback.
-     * This is also the default value.
-     */
-    MediaDeviceCategory forMedia = MediaDeviceCategory.NONE;
+enum AudioPolicyForceUse {
     /**
      * Configures the audio device used for "communication" (telephony, VoIP) use cases.
-     * Note that 'BT_BLE' and 'WIRED_ACCESSORY' can not be used in this case.
      */
-    CommunicationDeviceCategory forCommunication = CommunicationDeviceCategory.NONE;
+    COMMUNICATION = 0,
+    /**
+     * Configures the audio device used for media playback.
+     */
+    MEDIA = 1,
     /**
      * Configures the audio device used for recording.
-     * Note that 'SPEAKER' and 'BT_BLE' can not be used in this case.
      */
-    CommunicationDeviceCategory forRecord = CommunicationDeviceCategory.NONE;
-    /**
-     * Configures whether in muted audio mode ringing should also be sent to a BT device.
-     * Note that 'SPEAKER' and 'WIRED_ACCESSORY' can not be used in this case.
-     */
-    CommunicationDeviceCategory forVibrateRinging = CommunicationDeviceCategory.NONE;
+    RECORD = 2,
     /**
      * Specifies whether the phone is currently placed into a dock. The value of
-     * specifies the kind of the dock. This field may also be used that sending
-     * of audio to the dock is overridden by another device.
+     * 'AudioPolicyForcedConfig' specifies the kind of the dock.
      */
-    DockType dock = DockType.NONE;
+    DOCK = 3,
     /**
      * Specifies whether enforcing of certain sounds is enabled, for example,
      * enforcing of the camera shutter sound.
      */
-    boolean systemSounds = false;
+    SYSTEM = 4,
     /**
      * Specifies whether sending of system audio via HDMI is enabled.
      */
-    boolean hdmiSystemAudio = false;
+    HDMI_SYSTEM_AUDIO = 5,
     /**
      * Configures whether support for encoded surround formats is enabled for
      * applications.
      */
-    EncodedSurroundConfig encodedSurround = EncodedSurroundConfig.UNSPECIFIED;
+    ENCODED_SURROUND = 6,
+    /**
+     * Configures whether in muted audio mode ringing should also be sent to a BT device.
+     */
+    VIBRATE_RINGING = 7,
 }
