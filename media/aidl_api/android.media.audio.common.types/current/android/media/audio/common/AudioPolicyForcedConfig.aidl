@@ -34,13 +34,22 @@
 package android.media.audio.common;
 /* @hide */
 @Backing(type="int") @SuppressWarnings(value={"redundant-name"}) @VintfStability
-enum AudioPolicyForceUse {
-  COMMUNICATION = 0,
-  MEDIA = 1,
-  RECORD = 2,
-  DOCK = 3,
-  SYSTEM = 4,
-  HDMI_SYSTEM_AUDIO = 5,
-  ENCODED_SURROUND = 6,
-  VIBRATE_RINGING = 7,
+enum AudioPolicyForcedConfig {
+  NONE = 0,
+  SPEAKER = 1,
+  HEADPHONES = 2,
+  BT_SCO = 3,
+  BT_A2DP = 4,
+  WIRED_ACCESSORY = 5,
+  BT_CAR_DOCK = 6,
+  BT_DESK_DOCK = 7,
+  ANALOG_DOCK = 8,
+  DIGITAL_DOCK = 9,
+  NO_BT_A2DP = 10,
+  SYSTEM_ENFORCED = 11,
+  HDMI_SYSTEM_AUDIO_ENFORCED = 12,
+  ENCODED_SURROUND_NEVER = 13,
+  ENCODED_SURROUND_ALWAYS = 14,
+  ENCODED_SURROUND_MANUAL = 15,
+  BT_BLE = 16,
 }
