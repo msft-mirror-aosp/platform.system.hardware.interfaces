@@ -183,7 +183,22 @@ binder::Status SuspendControlServiceInternal::getWakeLockStats(
     }
 
     suspendService->updateStatsNow();
-    suspendService->getStatsList().getWakeLockStats(_aidl_return);
+    suspendService->getStatsList().getWakeLockStats(
+        BnSuspendControlServiceInternal::WAKE_LOCK_INFO_ALL_FIELDS, _aidl_return);
+
+    return binder::Status::ok();
+}
+
+binder::Status SuspendControlServiceInternal::getWakeLockStatsFiltered(
+    int wakeLockInfoFieldBitMask, std::vector<WakeLockInfo>* _aidl_return) {
+    const auto suspendService = mSuspend.promote();
+    if (!suspendService) {
+        return binder::Status::fromExceptionCode(binder::Status::Exception::EX_NULL_POINTER,
+                                                 String8("Null reference to suspendService"));
+    }
+
+    suspendService->updateStatsNow();
+    suspendService->getStatsList().getWakeLockStats(wakeLockInfoFieldBitMask, _aidl_return);
 
     return binder::Status::ok();
 }
