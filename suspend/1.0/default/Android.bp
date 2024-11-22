@@ -19,6 +19,9 @@ package {
 
 cc_defaults {
     name: "system_suspend_defaults",
+    defaults: [
+        "aconfig_lib_cc_static_link.defaults",
+    ],
     shared_libs: [
         "libbase",
         "libbinder",
@@ -27,6 +30,10 @@ cc_defaults {
         "libhidlbase",
         "liblog",
         "libutils",
+        "server_configurable_flags",
+    ],
+    static_libs: [
+        "suspend_service_flags_c_lib",
     ],
     cflags: [
         "-Wall",
@@ -205,4 +212,16 @@ cc_fuzz {
     srcs: [
         "fuzzers/SuspendServiceInternalFuzzer.cpp",
     ],
+}
+
+aconfig_declarations {
+    name: "suspend_service_flags",
+    package: "suspend_service.flags",
+    container: "system",
+    srcs: ["flags.aconfig"],
+}
+
+cc_aconfig_library {
+    name: "suspend_service_flags_c_lib",
+    aconfig_declarations: "suspend_service_flags",
 }
