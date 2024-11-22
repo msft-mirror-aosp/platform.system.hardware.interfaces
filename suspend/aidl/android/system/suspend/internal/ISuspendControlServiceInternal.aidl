@@ -46,6 +46,12 @@ interface ISuspendControlServiceInternal {
     WakeLockInfo[] getWakeLockStats();
 
     /**
+     * Returns a list of wake lock stats. Fields not selected with the
+     * bit mask are in an undefined state (see WAKE_LOCK_INFO_* below).
+     */
+    WakeLockInfo[] getWakeLockStatsFiltered(int wakeLockInfoFieldBitMask);
+
+    /**
      * Returns a list of wakeup stats.
      */
     WakeupInfo[] getWakeupStats();
@@ -54,4 +60,27 @@ interface ISuspendControlServiceInternal {
      * Returns stats related to suspend.
      */
     SuspendInfo getSuspendStats();
+
+    /**
+     * Used to select fields from WakeLockInfo that getWakeLockStats should return.
+     * This is in addition to the name of the wake lock, which is always returned.
+     */
+    const int WAKE_LOCK_INFO_ACTIVE_COUNT = 1 << 0;
+    const int WAKE_LOCK_INFO_LAST_CHANGE = 1 << 1;
+    const int WAKE_LOCK_INFO_MAX_TIME = 1 << 2;
+    const int WAKE_LOCK_INFO_TOTAL_TIME = 1 << 3;
+    const int WAKE_LOCK_INFO_IS_ACTIVE = 1 << 4;
+    const int WAKE_LOCK_INFO_ACTIVE_TIME = 1 << 5;
+    const int WAKE_LOCK_INFO_IS_KERNEL_WAKELOCK = 1 << 6;
+
+    // Specific to Native wake locks.
+    const int WAKE_LOCK_INFO_PID = 1 << 7;
+
+    // Specific to Kernel wake locks.
+    const int WAKE_LOCK_INFO_EVENT_COUNT = 1 << 8;
+    const int WAKE_LOCK_INFO_EXPIRE_COUNT = 1 << 9;
+    const int WAKE_LOCK_INFO_PREVENT_SUSPEND_TIME = 1 << 10;
+    const int WAKE_LOCK_INFO_WAKEUP_COUNT = 1 << 11;
+
+    const int WAKE_LOCK_INFO_ALL_FIELDS = (1 << 12) - 1;
 }
