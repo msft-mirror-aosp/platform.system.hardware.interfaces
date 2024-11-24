@@ -28,6 +28,7 @@
 #include <android-base/stringprintf.h>
 #include <android-base/strings.h>
 #include <android/binder_manager.h>
+#include <android/system/suspend/internal/ISuspendControlServiceInternal.h>
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -49,6 +50,8 @@ using ::android::base::ReadFdToString;
 using ::android::base::StringPrintf;
 using ::android::base::WriteStringToFd;
 using ::std::string;
+
+using ISCSI = ::android::system::suspend::internal::ISuspendControlServiceInternal;
 
 namespace android {
 namespace system {
@@ -425,7 +428,8 @@ void SystemSuspend::logKernelWakeLockStats() {
     std::stringstream klStats;
     klStats << "Kernel wakesource stats: ";
     std::vector<WakeLockInfo> wlStats;
-    mStatsList.getWakeLockStats(&wlStats);
+    mStatsList.getWakeLockStats(
+        ISCSI::WAKE_LOCK_INFO_ACTIVE_COUNT | ISCSI::WAKE_LOCK_INFO_TOTAL_TIME, &wlStats);
 
     for (const WakeLockInfo& wake : wlStats) {
         if ((wake.isKernelWakelock) && (wake.activeCount > 0)) {
