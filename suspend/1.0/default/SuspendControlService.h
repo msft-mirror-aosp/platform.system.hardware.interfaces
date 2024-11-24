@@ -75,6 +75,8 @@ class SuspendControlServiceInternal : public BnSuspendControlServiceInternal {
     binder::Status forceSuspend(bool* _aidl_return) override;
     binder::Status getSuspendStats(SuspendInfo* _aidl_return) override;
     binder::Status getWakeLockStats(std::vector<WakeLockInfo>* _aidl_return) override;
+    binder::Status getWakeLockStatsFiltered(int wakeLockInfoFieldBitMask,
+                                            std::vector<WakeLockInfo>* _aidl_return) override;
     binder::Status getWakeupStats(std::vector<WakeupInfo>* _aidl_return) override;
 
     void setSuspendService(const wp<SystemSuspend>& suspend);
