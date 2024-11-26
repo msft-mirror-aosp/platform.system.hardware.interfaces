@@ -33,14 +33,49 @@
 
 package android.media.audio.common;
 /* @hide */
-@Backing(type="int") @SuppressWarnings(value={"redundant-name"}) @VintfStability
-enum AudioPolicyForceUse {
-  COMMUNICATION = 0,
-  MEDIA = 1,
-  RECORD = 2,
-  DOCK = 3,
-  SYSTEM = 4,
-  HDMI_SYSTEM_AUDIO = 5,
-  ENCODED_SURROUND = 6,
-  VIBRATE_RINGING = 7,
+@SuppressWarnings(value={"redundant-name"}) @VintfStability
+union AudioPolicyForceUse {
+  android.media.audio.common.AudioPolicyForceUse.MediaDeviceCategory forMedia = android.media.audio.common.AudioPolicyForceUse.MediaDeviceCategory.NONE;
+  android.media.audio.common.AudioPolicyForceUse.CommunicationDeviceCategory forCommunication = android.media.audio.common.AudioPolicyForceUse.CommunicationDeviceCategory.NONE;
+  android.media.audio.common.AudioPolicyForceUse.CommunicationDeviceCategory forRecord = android.media.audio.common.AudioPolicyForceUse.CommunicationDeviceCategory.NONE;
+  android.media.audio.common.AudioPolicyForceUse.CommunicationDeviceCategory forVibrateRinging = android.media.audio.common.AudioPolicyForceUse.CommunicationDeviceCategory.NONE;
+  android.media.audio.common.AudioPolicyForceUse.DockType dock = android.media.audio.common.AudioPolicyForceUse.DockType.NONE;
+  boolean systemSounds = false;
+  boolean hdmiSystemAudio = false;
+  android.media.audio.common.AudioPolicyForceUse.EncodedSurroundConfig encodedSurround = android.media.audio.common.AudioPolicyForceUse.EncodedSurroundConfig.UNSPECIFIED;
+  @Backing(type="byte") @VintfStability
+  enum CommunicationDeviceCategory {
+    NONE = 0,
+    SPEAKER,
+    BT_SCO,
+    BT_BLE,
+    WIRED_ACCESSORY,
+  }
+  @Backing(type="byte") @VintfStability
+  enum MediaDeviceCategory {
+    NONE = 0,
+    SPEAKER,
+    HEADPHONES,
+    BT_A2DP,
+    ANALOG_DOCK,
+    DIGITAL_DOCK,
+    WIRED_ACCESSORY,
+    NO_BT_A2DP,
+  }
+  @Backing(type="byte") @VintfStability
+  enum DockType {
+    NONE = 0,
+    BT_CAR_DOCK,
+    BT_DESK_DOCK,
+    ANALOG_DOCK,
+    DIGITAL_DOCK,
+    WIRED_ACCESSORY,
+  }
+  @Backing(type="byte") @VintfStability
+  enum EncodedSurroundConfig {
+    UNSPECIFIED = 0,
+    NEVER,
+    ALWAYS,
+    MANUAL,
+  }
 }
