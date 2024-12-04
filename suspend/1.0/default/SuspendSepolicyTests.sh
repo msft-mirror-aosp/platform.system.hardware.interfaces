@@ -32,7 +32,9 @@ get_wakeup_paths() {
 }
 
 has_wakeup_attr() { #path
-    adb shell ls -dZ "$1" | grep -q "$wakeup_attr"
+    local _path="$1"
+
+    adb shell "ls -dZ $_path | grep -q $wakeup_attr"
     return $?
 }
 
