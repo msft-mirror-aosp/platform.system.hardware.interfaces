@@ -29,6 +29,15 @@ import android.media.audio.common.AudioProductStrategyType;
 @JavaDerive(equals=true, toString=true)
 @VintfStability
 parcelable AudioHalProductStrategy {
+    @VintfStability
+    @Backing(type="int")
+    enum ZoneId {
+        /**
+         * Value indicating that there is no explicit zone associated to the product strategy
+         * It is the case for non-automotive products or for default zone for automotive.
+         */
+        DEFAULT = 0,
+    }
     /**
      * Defines the start of the vendor-defined product strategies
      */
@@ -55,4 +64,16 @@ parcelable AudioHalProductStrategy {
      * must not be null for any.
      */
     @nullable @utf8InCpp String name;
+     /**
+      * Audio zone id can be used to independently manage audio routing and volume for different
+      * audio device configurations.
+      * In automotive for example, audio zone id can be used to route different user id to different
+      * audio zones. Thus providing independent audio routing and volume management for each user
+      * in the car.
+      * Note:
+      * 1/ Audio zone id must begin at DEFAULT and increment respectively from DEFAULT
+      * (i.e. DEFAULT + 1...).
+      * 2/ Audio zone id can be held by one or more product strategy(ies).
+      */
+    int zoneId = ZoneId.DEFAULT;
 }
