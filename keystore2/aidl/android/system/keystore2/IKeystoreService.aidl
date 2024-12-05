@@ -17,14 +17,15 @@
 package android.system.keystore2;
 
 import android.hardware.security.keymint.SecurityLevel;
+import android.hardware.security.keymint.Tag;
 import android.system.keystore2.Domain;
 import android.system.keystore2.IKeystoreSecurityLevel;
 import android.system.keystore2.KeyDescriptor;
 import android.system.keystore2.KeyEntryResponse;
 
 /**
- * `IKeystoreService` is the primary interface to Keystore. It provides
- * access simple database bound requests. Request that require interactions
+ * `IKeystoreService` is the primary interface to Keystore. It primarily provides
+ * access to simple database bound requests. Request that require interactions
  * with a KeyMint backend are delegated to `IKeystoreSecurityLevel` which
  * may be acquired through this interface as well.
  *
@@ -246,4 +247,19 @@ interface IKeystoreService {
     KeyDescriptor[] listEntriesBatched(in Domain domain, in long nspace,
             in @nullable String startingPastAlias);
 
+    /**
+     * Returns tag-specific info required to interpret a tag's attested value.
+     * Attested values themselves are located in the attestation certificate.
+     *
+     * The semantics of the return value is specific to the input tag:
+     *
+     * o Tag::MODULE_HASH: returns the DER-encoded structure corresponding to the `Modules` schema
+     *   described in the KeyMint HAL's KeyCreationResult.aidl. The SHA-256 hash of this encoded
+     *   structure is what's included with the tag in attestations.
+     *
+     * ## Error conditions
+     * `ResponseCode::INVALID_ARGUMENT` if `tag` is not specified in the list above.
+     * `ResponseCode::INFO_NOT_AVAILABLE` if `IKeystoreService` does not have the requested info.
+     */
+    byte[] getSupplementaryAttestationInfo(in Tag tag);
 }

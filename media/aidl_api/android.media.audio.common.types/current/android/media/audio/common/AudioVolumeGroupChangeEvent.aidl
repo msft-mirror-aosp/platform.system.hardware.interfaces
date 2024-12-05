@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 The Android Open Source Project
+ * Copyright 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,23 +33,24 @@
 
 package android.media.audio.common;
 /* @hide */
-@Backing(type="int") @SuppressWarnings(value={"redundant-name"}) @VintfStability
-enum AudioPolicyForcedConfig {
-  NONE = 0,
-  SPEAKER = 1,
-  HEADPHONES = 2,
-  BT_SCO = 3,
-  BT_A2DP = 4,
-  WIRED_ACCESSORY = 5,
-  BT_CAR_DOCK = 6,
-  BT_DESK_DOCK = 7,
-  ANALOG_DOCK = 8,
-  DIGITAL_DOCK = 9,
-  NO_BT_A2DP = 10,
-  SYSTEM_ENFORCED = 11,
-  HDMI_SYSTEM_AUDIO_ENFORCED = 12,
-  ENCODED_SURROUND_NEVER = 13,
-  ENCODED_SURROUND_ALWAYS = 14,
-  ENCODED_SURROUND_MANUAL = 15,
-  BT_BLE = 16,
+@JavaDerive(equals=true, toString=true) @SuppressWarnings(value={"redundant-name"}) @VintfStability
+parcelable AudioVolumeGroupChangeEvent {
+  int groupId;
+  int volumeIndex;
+  boolean muted;
+  int flags;
+  const int VOLUME_FLAG_SHOW_UI = (1 << 0) /* 1 */;
+  const int VOLUME_FLAG_ALLOW_RINGER_MODES = (1 << 1) /* 2 */;
+  const int VOLUME_FLAG_PLAY_SOUND = (1 << 2) /* 4 */;
+  const int VOLUME_FLAG_REMOVE_SOUND_AND_VIBRATE = (1 << 3) /* 8 */;
+  const int VOLUME_FLAG_VIBRATE = (1 << 4) /* 16 */;
+  const int VOLUME_FLAG_FIXED_VOLUME = (1 << 5) /* 32 */;
+  const int VOLUME_FLAG_BLUETOOTH_ABS_VOLUME = (1 << 6) /* 64 */;
+  const int VOLUME_FLAG_SHOW_SILENT_HINT = (1 << 7) /* 128 */;
+  const int VOLUME_FLAG_HDMI_SYSTEM_AUDIO_VOLUME = (1 << 8) /* 256 */;
+  const int VOLUME_FLAG_ACTIVE_MEDIA_ONLY = (1 << 9) /* 512 */;
+  const int VOLUME_FLAG_SHOW_UI_WARNINGS = (1 << 10) /* 1024 */;
+  const int VOLUME_FLAG_SHOW_VIBRATE_HINT = (1 << 11) /* 2048 */;
+  const int VOLUME_FLAG_FROM_KEY = (1 << 12) /* 4096 */;
+  const int VOLUME_FLAG_ABSOLUTE_VOLUME = (1 << 13) /* 8192 */;
 }
