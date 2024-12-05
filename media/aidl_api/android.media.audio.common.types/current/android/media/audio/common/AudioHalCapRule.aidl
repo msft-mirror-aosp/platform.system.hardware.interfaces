@@ -55,7 +55,6 @@ parcelable AudioHalCapRule {
   @VintfStability
   parcelable CriterionRule {
     android.media.audio.common.AudioHalCapRule.MatchingRule matchingRule = android.media.audio.common.AudioHalCapRule.MatchingRule.INVALID;
-    android.media.audio.common.AudioHalCapCriterionV2 criterion;
-    android.media.audio.common.AudioHalCapCriterionV2.Type criterionTypeValue;
+    android.media.audio.common.AudioHalCapCriterionV2 criterionAndValue;
   }
 }
