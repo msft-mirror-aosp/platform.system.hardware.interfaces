@@ -27,9 +27,9 @@ import android.media.audio.common.AudioHalCapCriterionV2;
  *      -type of criterion:
  *              -inclusive -> match rules are "Includes" or "Excludes"
  *              -exclusive -> match rules are "Is" or "IsNot" aka equal or different
- *      -Name of the criterion must match the provided name in AudioHalCapCriterion
+ *      -Name of the criterion must match the provided name in AudioHalCapCriterionV2
  *      -Value of the criterion must match the provided list of literal values from
- *         AudioHalCapCriterionType
+ *         associated AudioHalCapCriterionV2 values
  * Example of rule:
  *      ALL
  *          ANY
@@ -105,14 +105,11 @@ parcelable AudioHalCapRule {
     parcelable CriterionRule {
         MatchingRule matchingRule = MatchingRule.INVALID;
         /*
-         * Must be one of the name defined by {@see AudioHalCapCriterionV2}.
+         * Must be one of the names defined by {@see AudioHalCapCriterionV2}.
+         * By convention, when AudioHalCapCriterionV2 is used as a rule, the rule uses
+         * the first element of the 'values' field which must be a non-empty array.
          */
-        AudioHalCapCriterionV2 criterion;
-        /*
-         * Must be one of the value defined by {@see AudioHalCapCriterionV2::Type}.
-         * Must be one of the associated {@see AudioHalCapCriterionV2} values.
-         */
-        AudioHalCapCriterionV2.Type criterionTypeValue;
+        AudioHalCapCriterionV2 criterionAndValue;
     }
     /*
      * Defines the AND or OR'ed logcal rule between provided criterion rules if any and provided
