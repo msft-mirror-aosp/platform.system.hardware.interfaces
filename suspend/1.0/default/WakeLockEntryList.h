@@ -49,16 +49,32 @@ class WakeLockEntryList {
     // updateNow() should be called before getWakeLockStats() to ensure stats are
     // updated wrt the current time.
     void updateNow();
-    void getWakeLockStats(std::vector<WakeLockInfo>* aidl_return) const;
+    void getWakeLockStats(int wakeLockInfoFieldBitMask,
+                          std::vector<WakeLockInfo>* aidl_return) const;
     friend std::ostream& operator<<(std::ostream& out, const WakeLockEntryList& list);
 
    private:
-    void evictIfFull() REQUIRES(mStatsLock);
-    void insertEntry(WakeLockInfo entry) REQUIRES(mStatsLock);
-    void deleteEntry(std::list<WakeLockInfo>::iterator entry) REQUIRES(mStatsLock);
+    void evictIfFull() REQUIRES(mLock);
+    void insertEntry(WakeLockInfo entry) REQUIRES(mLock);
+    void deleteEntry(std::list<WakeLockInfo>::iterator entry) REQUIRES(mLock);
     WakeLockInfo createNativeEntry(const std::string& name, int pid, TimestampType timeNow) const;
     WakeLockInfo createKernelEntry(const std::string& name) const;
-    void getKernelWakelockStats(std::vector<WakeLockInfo>* aidl_return) const;
+
+    // Used by createKernelEntry to reduce heap churn on successive calls.
+    struct ScratchSpace {
+        static constexpr const int BUFF_SIZE = 1024;
+        char readBuff[BUFF_SIZE];
+        std::string statName, valStr;
+        ScratchSpace() {
+            valStr.reserve(BUFF_SIZE);
+            statName.reserve(BUFF_SIZE);
+        }
+    };
+    WakeLockInfo createKernelEntry(ScratchSpace* ss, int wakeLockInfoFieldBitMask,
+                                   const std::string& name) const;
+
+    void getKernelWakelockStats(int wakeLockInfoFieldBitMask,
+                                std::vector<WakeLockInfo>* aidl_return) const;
 
     // Hash for WakeLockEntry key (pair<std::string, int>)
     struct LockHash {
@@ -67,17 +83,18 @@ class WakeLockEntryList {
         }
     };
 
+    mutable std::mutex mLock;
+
     size_t mCapacity;
     unique_fd mKernelWakelockStatsFd;
-
-    mutable std::mutex mStatsLock;
+    mutable std::unordered_map<std::string, unique_fd> mFdCache GUARDED_BY(mLock);
 
     // std::list and std::unordered map are used to support both inserting a stat
     // and eviction of the LRU stat in O(1) time. The LRU stat is maintained at
     // the back of the list.
-    std::list<WakeLockInfo> mStats GUARDED_BY(mStatsLock);
+    std::list<WakeLockInfo> mStats GUARDED_BY(mLock);
     std::unordered_map<std::pair<std::string, int>, std::list<WakeLockInfo>::iterator, LockHash>
-        mLookupTable GUARDED_BY(mStatsLock);
+        mLookupTable GUARDED_BY(mLock);
 };
 
 }  // namespace V1_0

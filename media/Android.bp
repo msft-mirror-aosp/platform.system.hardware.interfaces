@@ -68,7 +68,6 @@ aidl_interface {
         "aidl/android/media/audio/common/AudioOffloadInfo.aidl",
         "aidl/android/media/audio/common/AudioOutputFlags.aidl",
         "aidl/android/media/audio/common/AudioPlaybackRate.aidl",
-        "aidl/android/media/audio/common/AudioPolicyForcedConfig.aidl",
         "aidl/android/media/audio/common/AudioPolicyForceUse.aidl",
         "aidl/android/media/audio/common/AudioPort.aidl",
         "aidl/android/media/audio/common/AudioPortConfig.aidl",
@@ -83,6 +82,7 @@ aidl_interface {
         "aidl/android/media/audio/common/AudioStreamType.aidl",
         "aidl/android/media/audio/common/AudioUsage.aidl",
         "aidl/android/media/audio/common/AudioUuid.aidl",
+        "aidl/android/media/audio/common/AudioVolumeGroupChangeEvent.aidl",
         "aidl/android/media/audio/common/Boolean.aidl",
         "aidl/android/media/audio/common/Byte.aidl",
         "aidl/android/media/audio/common/ExtraAudioDescriptor.aidl",
@@ -123,6 +123,9 @@ aidl_interface {
                 "//apex_available:platform",
                 "com.android.btservices",
             ],
+        },
+        rust: {
+            enabled: true,
         },
     },
     versions_with_info: [
@@ -209,6 +212,13 @@ cc_defaults {
             ],
         },
     },
+}
+
+rust_defaults {
+    name: "latest_android_media_audio_common_types_rust",
+    rustlibs: [
+        latest_android_media_audio_common_types + "-rust",
+    ],
 }
 
 aidl_interface_defaults {

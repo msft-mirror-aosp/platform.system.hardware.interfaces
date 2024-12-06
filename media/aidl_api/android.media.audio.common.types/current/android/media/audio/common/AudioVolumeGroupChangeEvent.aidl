@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,21 +31,26 @@
 // with such a backward incompatible change, it has a high risk of breaking
 // later when a module using the interface is updated, e.g., Mainline modules.
 
-package android.system.keystore2;
+package android.media.audio.common;
 /* @hide */
-@VintfStability
-interface IKeystoreService {
-  android.system.keystore2.IKeystoreSecurityLevel getSecurityLevel(in android.hardware.security.keymint.SecurityLevel securityLevel);
-  android.system.keystore2.KeyEntryResponse getKeyEntry(in android.system.keystore2.KeyDescriptor key);
-  void updateSubcomponent(in android.system.keystore2.KeyDescriptor key, in @nullable byte[] publicCert, in @nullable byte[] certificateChain);
-  /**
-   * @deprecated use listEntriesBatched instead.
-   */
-  android.system.keystore2.KeyDescriptor[] listEntries(in android.system.keystore2.Domain domain, in long nspace);
-  void deleteKey(in android.system.keystore2.KeyDescriptor key);
-  android.system.keystore2.KeyDescriptor grant(in android.system.keystore2.KeyDescriptor key, in int granteeUid, in int accessVector);
-  void ungrant(in android.system.keystore2.KeyDescriptor key, in int granteeUid);
-  int getNumberOfEntries(in android.system.keystore2.Domain domain, in long nspace);
-  android.system.keystore2.KeyDescriptor[] listEntriesBatched(in android.system.keystore2.Domain domain, in long nspace, in @nullable String startingPastAlias);
-  byte[] getSupplementaryAttestationInfo(in android.hardware.security.keymint.Tag tag);
+@JavaDerive(equals=true, toString=true) @SuppressWarnings(value={"redundant-name"}) @VintfStability
+parcelable AudioVolumeGroupChangeEvent {
+  int groupId;
+  int volumeIndex;
+  boolean muted;
+  int flags;
+  const int VOLUME_FLAG_SHOW_UI = (1 << 0) /* 1 */;
+  const int VOLUME_FLAG_ALLOW_RINGER_MODES = (1 << 1) /* 2 */;
+  const int VOLUME_FLAG_PLAY_SOUND = (1 << 2) /* 4 */;
+  const int VOLUME_FLAG_REMOVE_SOUND_AND_VIBRATE = (1 << 3) /* 8 */;
+  const int VOLUME_FLAG_VIBRATE = (1 << 4) /* 16 */;
+  const int VOLUME_FLAG_FIXED_VOLUME = (1 << 5) /* 32 */;
+  const int VOLUME_FLAG_BLUETOOTH_ABS_VOLUME = (1 << 6) /* 64 */;
+  const int VOLUME_FLAG_SHOW_SILENT_HINT = (1 << 7) /* 128 */;
+  const int VOLUME_FLAG_HDMI_SYSTEM_AUDIO_VOLUME = (1 << 8) /* 256 */;
+  const int VOLUME_FLAG_ACTIVE_MEDIA_ONLY = (1 << 9) /* 512 */;
+  const int VOLUME_FLAG_SHOW_UI_WARNINGS = (1 << 10) /* 1024 */;
+  const int VOLUME_FLAG_SHOW_VIBRATE_HINT = (1 << 11) /* 2048 */;
+  const int VOLUME_FLAG_FROM_KEY = (1 << 12) /* 4096 */;
+  const int VOLUME_FLAG_ABSOLUTE_VOLUME = (1 << 13) /* 8192 */;
 }

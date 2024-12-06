@@ -20,6 +20,8 @@
 #include <android-base/logging.h>
 #include <android-base/parseint.h>
 #include <android-base/stringprintf.h>
+#include <android/system/suspend/internal/ISuspendControlServiceInternal.h>
+#include <suspend_service_flags.h>
 
 #include <iomanip>
 
@@ -27,11 +29,36 @@ using android::base::ParseInt;
 using android::base::ReadFdToString;
 using android::base::Readlink;
 using android::base::StringPrintf;
+using suspend_service::flags::fast_kernel_wakelock_reporting;
+
+using ISCSI = ::android::system::suspend::internal::ISuspendControlServiceInternal;
 
 namespace android {
 namespace system {
 namespace suspend {
 namespace V1_0 {
+
+namespace {
+
+struct BitAndFilename {
+    int32_t bit;
+    std::string filename;
+};
+
+const BitAndFilename FIELDS[] = {
+    {-1, "name"},
+    {ISCSI::WAKE_LOCK_INFO_ACTIVE_COUNT, "active_count"},
+    {ISCSI::WAKE_LOCK_INFO_LAST_CHANGE, "last_change_ms"},
+    {ISCSI::WAKE_LOCK_INFO_MAX_TIME, "max_time_ms"},
+    {ISCSI::WAKE_LOCK_INFO_TOTAL_TIME, "total_time_ms"},
+    {ISCSI::WAKE_LOCK_INFO_ACTIVE_TIME, "active_time_ms"},
+    {ISCSI::WAKE_LOCK_INFO_EVENT_COUNT, "event_count"},
+    {ISCSI::WAKE_LOCK_INFO_EXPIRE_COUNT, "expire_count"},
+    {ISCSI::WAKE_LOCK_INFO_PREVENT_SUSPEND_TIME, "prevent_suspend_time_ms"},
+    {ISCSI::WAKE_LOCK_INFO_WAKEUP_COUNT, "wakeup_count"},
+};
+
+}  // namespace
 
 static std::ostream& operator<<(std::ostream& out, const WakeLockInfo& entry) {
     const char* sep = " | ";
@@ -65,7 +92,7 @@ static std::ostream& operator<<(std::ostream& out, const WakeLockInfo& entry) {
 
 std::ostream& operator<<(std::ostream& out, const WakeLockEntryList& list) {
     std::vector<WakeLockInfo> wlStats;
-    list.getWakeLockStats(&wlStats);
+    list.getWakeLockStats(ISCSI::WAKE_LOCK_INFO_ALL_FIELDS, &wlStats);
     int width = 194;
     const char* sep = " | ";
     std::stringstream ss;
@@ -324,20 +351,146 @@ WakeLockInfo WakeLockEntryList::createKernelEntry(const std::string& kwlId) cons
     return info;
 }
 
-void WakeLockEntryList::getKernelWakelockStats(std::vector<WakeLockInfo>* aidl_return) const {
+/*
+ * Creates and returns a kernel wakelock entry with data read from mKernelWakelockStatsFd.
+ * Has been micro-optimized to reduce CPU time and wall time.
+ */
+WakeLockInfo WakeLockEntryList::createKernelEntry(ScratchSpace* ss, int wakeLockInfoFieldBitMask,
+                                                  const std::string& kwlId) const {
+    WakeLockInfo info;
+
+    info.activeCount = 0;
+    info.lastChange = 0;
+    info.maxTime = 0;
+    info.totalTime = 0;
+    info.isActive = false;
+    info.activeTime = 0;
+    info.isKernelWakelock = true;
+
+    info.pid = -1;  // N/A
+
+    info.eventCount = 0;
+    info.expireCount = 0;
+    info.preventSuspendTime = 0;
+    info.wakeupCount = 0;
+
+    for (const auto& field : FIELDS) {
+        const bool isNameField = field.bit == -1;
+        if (!isNameField && (wakeLockInfoFieldBitMask & field.bit) == 0) {
+            continue;
+        }
+
+        ss->statName = kwlId + "/" + field.filename;
+        int statFd = -1;
+
+        {
+            std::lock_guard<std::mutex> lock(mLock);
+            // Check if we have a valid cached file descriptor.
+            auto it = mFdCache.find(ss->statName);
+            if (it != mFdCache.end() && it->second >= 0) {
+                auto result = lseek(it->second, 0, SEEK_SET);
+                if (result < 0) {
+                    PLOG(ERROR) << "Could not seek to start of FD for " << ss->statName;
+                    mFdCache.erase(it);
+                    PLOG(ERROR) << "Closed the FD.";
+                } else {
+                    statFd = it->second;
+                }
+            }
+
+            if (statFd == -1) {
+                unique_fd tmpFd(TEMP_FAILURE_RETRY(
+                    openat(mKernelWakelockStatsFd, ss->statName.c_str(), O_CLOEXEC | O_RDONLY)));
+                if (tmpFd < 0) {
+                    PLOG(ERROR) << "Error opening " << ss->statName << " for " << kwlId;
+                    continue;
+                }
+                statFd = tmpFd;
+                mFdCache.insert(it, {ss->statName, std::move(tmpFd)});
+            }
+        }  // mLock is released here
+
+        ss->valStr.clear();
+        ssize_t n;
+        while ((n = TEMP_FAILURE_RETRY(read(statFd, &ss->readBuff[0], sizeof(ss->readBuff)))) > 0) {
+            ss->valStr.append(ss->readBuff, n);
+        }
+        if (n < 0) {
+            PLOG(ERROR) << "Error reading " << ss->statName;
+            {
+                std::lock_guard<std::mutex> lock(mLock);
+                mFdCache.erase(ss->statName);
+                PLOG(ERROR) << "Closed the FD.";
+            }
+            continue;
+        }
+
+        // Trim newline
+        ss->valStr.erase(std::remove(ss->valStr.begin(), ss->valStr.end(), '\n'), ss->valStr.end());
+
+        if (isNameField) {
+            info.name = ss->valStr;
+            continue;
+        }
+
+        int64_t statVal;
+        if (!ParseInt(ss->valStr, &statVal)) {
+            std::string path;
+            if (Readlink(StringPrintf("/proc/self/fd/%d", statFd), &path)) {
+                LOG(ERROR) << "Unexpected format for wakelock stat value (" << ss->valStr
+                           << ") from file: " << path;
+            } else {
+                LOG(ERROR) << "Unexpected format for wakelock stat value (" << ss->valStr << ")";
+            }
+            continue;
+        }
+
+        if (field.filename == "active_count") {
+            info.activeCount = statVal;
+        } else if (field.filename == "active_time_ms") {
+            info.activeTime = statVal;
+        } else if (field.filename == "event_count") {
+            info.eventCount = statVal;
+        } else if (field.filename == "expire_count") {
+            info.expireCount = statVal;
+        } else if (field.filename == "last_change_ms") {
+            info.lastChange = statVal;
+        } else if (field.filename == "max_time_ms") {
+            info.maxTime = statVal;
+        } else if (field.filename == "prevent_suspend_time_ms") {
+            info.preventSuspendTime = statVal;
+        } else if (field.filename == "total_time_ms") {
+            info.totalTime = statVal;
+        } else if (field.filename == "wakeup_count") {
+            info.wakeupCount = statVal;
+        }
+    }
+
+    // Derived stats
+    info.isActive = info.activeTime > 0;
+
+    return info;
+}
+
+void WakeLockEntryList::getKernelWakelockStats(int wakeLockInfoFieldBitMask,
+                                               std::vector<WakeLockInfo>* aidl_return) const {
     std::unique_ptr<DIR, decltype(&closedir)> dp(fdopendir(dup(mKernelWakelockStatsFd.get())),
                                                  &closedir);
     if (dp) {
         // rewinddir, else subsequent calls will not get any kernel wakelocks.
         rewinddir(dp.get());
 
+        ScratchSpace ss;
         struct dirent* de;
         while ((de = readdir(dp.get()))) {
             std::string kwlId(de->d_name);
             if ((kwlId == ".") || (kwlId == "..")) {
                 continue;
             }
-            WakeLockInfo entry = createKernelEntry(kwlId);
+            WakeLockInfo entry = fast_kernel_wakelock_reporting()
+                                     ? createKernelEntry(&ss, wakeLockInfoFieldBitMask, kwlId)
+                                     : createKernelEntry(kwlId);
+
             aidl_return->emplace_back(std::move(entry));
         }
     }
@@ -346,7 +499,7 @@ void WakeLockEntryList::getKernelWakelockStats(std::vector<WakeLockInfo>* aidl_r
 void WakeLockEntryList::updateOnAcquire(const std::string& name, int pid) {
     TimestampType timeNow = getTimeNow();
 
-    std::lock_guard<std::mutex> lock(mStatsLock);
+    std::lock_guard<std::mutex> lock(mLock);
 
     auto key = std::make_pair(name, pid);
     auto it = mLookupTable.find(key);
@@ -372,7 +525,7 @@ void WakeLockEntryList::updateOnAcquire(const std::string& name, int pid) {
 void WakeLockEntryList::updateOnRelease(const std::string& name, int pid) {
     TimestampType timeNow = getTimeNow();
 
-    std::lock_guard<std::mutex> lock(mStatsLock);
+    std::lock_guard<std::mutex> lock(mLock);
 
     auto key = std::make_pair(name, pid);
     auto it = mLookupTable.find(key);
@@ -406,7 +559,7 @@ void WakeLockEntryList::updateOnRelease(const std::string& name, int pid) {
  * Updates the native wakelock stats based on the current time.
  */
 void WakeLockEntryList::updateNow() {
-    std::lock_guard<std::mutex> lock(mStatsLock);
+    std::lock_guard<std::mutex> lock(mLock);
 
     TimestampType timeNow = getTimeNow();
 
@@ -421,15 +574,16 @@ void WakeLockEntryList::updateNow() {
     }
 }
 
-void WakeLockEntryList::getWakeLockStats(std::vector<WakeLockInfo>* aidl_return) const {
+void WakeLockEntryList::getWakeLockStats(int wakeLockInfoFieldBitMask,
+                                         std::vector<WakeLockInfo>* aidl_return) const {
     // Under no circumstances should the lock be held while getting kernel wakelock stats
     {
-        std::lock_guard<std::mutex> lock(mStatsLock);
+        std::lock_guard<std::mutex> lock(mLock);
         for (const WakeLockInfo& entry : mStats) {
             aidl_return->emplace_back(entry);
         }
     }
-    getKernelWakelockStats(aidl_return);
+    getKernelWakelockStats(wakeLockInfoFieldBitMask, aidl_return);
 }
 
 }  // namespace V1_0
