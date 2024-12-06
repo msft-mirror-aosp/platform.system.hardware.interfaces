@@ -13,11 +13,15 @@
 // limitations under the License.
 
 package {
+    default_team: "trendy_team_android_kernel",
     default_applicable_licenses: ["Android-Apache-2.0"],
 }
 
 cc_defaults {
     name: "system_suspend_defaults",
+    defaults: [
+        "aconfig_lib_cc_static_link.defaults",
+    ],
     shared_libs: [
         "libbase",
         "libbinder",
@@ -26,6 +30,10 @@ cc_defaults {
         "libhidlbase",
         "liblog",
         "libutils",
+        "server_configurable_flags",
+    ],
+    static_libs: [
+        "suspend_service_flags_c_lib",
     ],
     cflags: [
         "-Wall",
@@ -67,6 +75,11 @@ cc_defaults {
     ],
 }
 
+vintf_fragment {
+    name: "android.system.suspend-service.xml",
+    src: "android.system.suspend-service.xml",
+}
+
 cc_binary {
     name: "android.system.suspend-service",
     relative_install_path: "hw",
@@ -74,7 +87,7 @@ cc_binary {
         "android.system.suspend-service_defaults",
     ],
     init_rc: ["android.system.suspend-service.rc"],
-    vintf_fragments: ["android.system.suspend-service.xml"],
+    vintf_fragment_modules: ["android.system.suspend-service.xml"],
     srcs: [
         "main.cpp",
     ],
@@ -199,4 +212,16 @@ cc_fuzz {
     srcs: [
         "fuzzers/SuspendServiceInternalFuzzer.cpp",
     ],
+}
+
+aconfig_declarations {
+    name: "suspend_service_flags",
+    package: "suspend_service.flags",
+    container: "system",
+    srcs: ["flags.aconfig"],
+}
+
+cc_aconfig_library {
+    name: "suspend_service_flags_c_lib",
+    aconfig_declarations: "suspend_service_flags",
 }

@@ -41,17 +41,15 @@ union AudioHalCapCriterionV2 {
   android.media.audio.common.AudioHalCapCriterionV2.AvailableDevicesAddresses availableOutputDevicesAddresses;
   android.media.audio.common.AudioHalCapCriterionV2.TelephonyMode telephonyMode;
   android.media.audio.common.AudioHalCapCriterionV2.ForceConfigForUse forceConfigForUse;
-  android.media.audio.common.AudioHalCapCriterionV2.Type type;
-  @VintfStability
+  @Backing(type="byte") @VintfStability
   enum LogicalDisjunction {
     EXCLUSIVE = 0,
     INCLUSIVE,
   }
   @VintfStability
   parcelable ForceConfigForUse {
-    android.media.audio.common.AudioPolicyForceUse forceUse = android.media.audio.common.AudioPolicyForceUse.MEDIA;
-    android.media.audio.common.AudioPolicyForcedConfig[] values;
-    android.media.audio.common.AudioPolicyForcedConfig defaultValue = android.media.audio.common.AudioPolicyForcedConfig.NONE;
+    android.media.audio.common.AudioPolicyForceUse[] values;
+    android.media.audio.common.AudioPolicyForceUse defaultValue;
     android.media.audio.common.AudioHalCapCriterionV2.LogicalDisjunction logic = android.media.audio.common.AudioHalCapCriterionV2.LogicalDisjunction.EXCLUSIVE;
   }
   @VintfStability
@@ -69,12 +67,5 @@ union AudioHalCapCriterionV2 {
   parcelable AvailableDevicesAddresses {
     android.media.audio.common.AudioDeviceAddress[] values;
     android.media.audio.common.AudioHalCapCriterionV2.LogicalDisjunction logic = android.media.audio.common.AudioHalCapCriterionV2.LogicalDisjunction.INCLUSIVE;
-  }
-  @VintfStability
-  union Type {
-    android.media.audio.common.AudioDeviceDescription availableDevicesType;
-    android.media.audio.common.AudioDeviceAddress availableDevicesAddressesType;
-    android.media.audio.common.AudioMode telephonyModeType;
-    android.media.audio.common.AudioPolicyForcedConfig forcedConfigType;
   }
 }
