@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2024 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,17 +31,10 @@
 // with such a backward incompatible change, it has a high risk of breaking
 // later when a module using the interface is updated, e.g., Mainline modules.
 
-package android.media.audio.common;
-/* @hide */
-@JavaDerive(equals=true, toString=true) @SuppressWarnings(value={"redundant-name"}) @VintfStability
-parcelable AudioHalProductStrategy {
-  int id = android.media.audio.common.AudioProductStrategyType.SYS_RESERVED_NONE /* -1 */;
-  android.media.audio.common.AudioHalAttributesGroup[] attributesGroups;
-  @nullable @utf8InCpp String name;
-  int zoneId = android.media.audio.common.AudioHalProductStrategy.ZoneId.DEFAULT /* 0 */;
-  const int VENDOR_STRATEGY_ID_START = 1000;
-  @Backing(type="int") @VintfStability
-  enum ZoneId {
-    DEFAULT = 0,
-  }
+package android.media.audio.eraser;
+@JavaDerive(equals=true, toString=true) @VintfStability
+parcelable ClassificationConfig {
+  android.media.audio.eraser.Classification[] classifications;
+  float confidenceThreshold = 0f;
+  float gainFactor = 1f;
 }
