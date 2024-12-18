@@ -183,7 +183,22 @@ binder::Status SuspendControlServiceInternal::getWakeLockStats(
     }
 
     suspendService->updateStatsNow();
-    suspendService->getStatsList().getWakeLockStats(_aidl_return);
+    suspendService->getStatsList().getWakeLockStats(
+        BnSuspendControlServiceInternal::WAKE_LOCK_INFO_ALL_FIELDS, _aidl_return);
+
+    return binder::Status::ok();
+}
+
+binder::Status SuspendControlServiceInternal::getWakeLockStatsFiltered(
+    int wakeLockInfoFieldBitMask, std::vector<WakeLockInfo>* _aidl_return) {
+    const auto suspendService = mSuspend.promote();
+    if (!suspendService) {
+        return binder::Status::fromExceptionCode(binder::Status::Exception::EX_NULL_POINTER,
+                                                 String8("Null reference to suspendService"));
+    }
+
+    suspendService->updateStatsNow();
+    suspendService->getStatsList().getWakeLockStats(wakeLockInfoFieldBitMask, _aidl_return);
 
     return binder::Status::ok();
 }
@@ -282,6 +297,7 @@ status_t SuspendControlServiceInternal::dump(int fd, const Vector<String16>& arg
             "----- Suspend Stats -----\n"
             "%s: %d\n%s: %d\n%s: %d\n%s: %d\n%s: %d\n"
             "%s: %d\n%s: %d\n%s: %d\n%s: %d\n%s: %d\n"
+            "%s: %" PRIu64 "\n%s: %" PRIu64 "\n%s: %" PRIu64 "\n"
             "\nLast Failures:\n"
             "    %s: %s\n"
             "    %s: %d\n"
@@ -298,6 +314,9 @@ status_t SuspendControlServiceInternal::dump(int fd, const Vector<String16>& arg
             "failed_resume", stats.failedResume,
             "failed_resume_early", stats.failedResumeEarly,
             "failed_resume_noirq", stats.failedResumeNoirq,
+            "last_hw_sleep", stats.lastHwSleep,
+            "total_hw_sleep", stats.totalHwSleep,
+            "max_hw_sleep", stats.maxHwSleep,
             "last_failed_dev", stats.lastFailedDev.c_str(),
             "last_failed_errno", stats.lastFailedErrno,
             "last_failed_step", stats.lastFailedStep.c_str());

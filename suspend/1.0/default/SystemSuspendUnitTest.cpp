@@ -30,6 +30,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <hidl/HidlTransportSupport.h>
+#include <suspend_service_flags.h>
 #include <sys/poll.h>
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -228,7 +229,8 @@ class SystemSuspendTest : public ::testing::Test {
 
     size_t getActiveWakeLockCount() {
         std::vector<WakeLockInfo> wlStats;
-        controlServiceInternal->getWakeLockStats(&wlStats);
+        controlServiceInternal->getWakeLockStatsFiltered(
+            ISuspendControlServiceInternal::WAKE_LOCK_INFO_ACTIVE_COUNT, &wlStats);
         return count_if(wlStats.begin(), wlStats.end(), [](auto entry) { return entry.isActive; });
     }
 
@@ -1118,8 +1120,10 @@ class SystemSuspendSameThreadTest : public ::testing::Test {
                          int64_t failedSuspendLate = 42, int64_t failedSuspendNoirq = 42,
                          int64_t failedResume = 42, int64_t failedResumeEarly = 42,
                          int64_t failedResumeNoirq = 42,
-                         const std::string& lastFailedDev = "fakeDev", int64_t lastFailedErrno = 42,
-                         const std::string& lastFailedStep = "fakeStep") {
+                         const std::string& lastFailedDev = "fakeDev",
+                         int64_t lastFailedErrno = -42,
+                         const std::string& lastFailedStep = "fakeStep", uint64_t lastHwSleep = 42,
+                         uint64_t totalHwSleep = 42, uint64_t maxHwSleep = 523986009990) {
         int fd = suspendStatsFd.get();
 
         return writeStatToFile(fd, "success", success) && writeStatToFile(fd, "fail", fail) &&
@@ -1133,7 +1137,10 @@ class SystemSuspendSameThreadTest : public ::testing::Test {
                writeStatToFile(fd, "failed_resume_noirq", failedResumeNoirq) &&
                writeStatToFile(fd, "last_failed_dev", lastFailedDev) &&
                writeStatToFile(fd, "last_failed_errno", lastFailedErrno) &&
-               writeStatToFile(fd, "last_failed_step", lastFailedStep);
+               writeStatToFile(fd, "last_failed_step", lastFailedStep) &&
+               writeStatToFile(fd, "last_hw_sleep", lastHwSleep) &&
+               writeStatToFile(fd, "total_hw_sleep", totalHwSleep) &&
+               writeStatToFile(fd, "max_hw_sleep", maxHwSleep);
     }
 
     bool removeDirectoryEntry(const std::string& path) {
@@ -1194,9 +1201,10 @@ class SystemSuspendSameThreadTest : public ::testing::Test {
     /**
      * Returns wakelock stats.
      */
-    std::vector<WakeLockInfo> getWakelockStats() {
+    std::vector<WakeLockInfo> getWakelockStats(
+        int32_t selectBitmap = ISuspendControlServiceInternal::WAKE_LOCK_INFO_ALL_FIELDS) {
         std::vector<WakeLockInfo> wlStats;
-        controlServiceInternal->getWakeLockStats(&wlStats);
+        controlServiceInternal->getWakeLockStatsFiltered(selectBitmap, &wlStats);
         return wlStats;
     }
 
@@ -1260,6 +1268,24 @@ class SystemSuspendSameThreadTest : public ::testing::Test {
     };
 };
 
+class mock_flag_provider_interface : public suspend_service::flags::flag_provider_interface {
+   public:
+    MOCK_METHOD(bool, fast_kernel_wakelock_reporting, (), (override));
+};
+
+class ParameterizedSystemSuspendSameThreadTest : public SystemSuspendSameThreadTest,
+                                                 public ::testing::WithParamInterface<bool> {
+   protected:
+    void SetUp() override {
+        auto mock_flag_provider = std::make_unique<mock_flag_provider_interface>();
+        ON_CALL(*mock_flag_provider, fast_kernel_wakelock_reporting())
+            .WillByDefault(::testing::Return(GetParam()));
+        suspend_service::flags::provider_ = std::move(mock_flag_provider);
+
+        SystemSuspendSameThreadTest::SetUp();
+    }
+};
+
 // Test that getWakeLockStats has correct information about Native WakeLocks.
 TEST_F(SystemSuspendSameThreadTest, GetNativeWakeLockStats) {
     std::string fakeWlName = "FakeLock";
@@ -1306,8 +1332,11 @@ TEST_F(SystemSuspendSameThreadTest, GetNativeWakeLockStats) {
     ASSERT_EQ(nwlInfo.wakeupCount, 0);
 }
 
+INSTANTIATE_TEST_SUITE_P(ParameterizedSystemSuspendSameThreadTest,
+                         ParameterizedSystemSuspendSameThreadTest, ::testing::Bool());
+
 // Test that getWakeLockStats has correct information about Kernel WakeLocks.
-TEST_F(SystemSuspendSameThreadTest, GetKernelWakeLockStats) {
+TEST_P(ParameterizedSystemSuspendSameThreadTest, GetKernelWakeLockStats) {
     std::string fakeKwlName1 = "fakeKwl1";
     std::string fakeKwlName2 = "fakeKwl2";
     addKernelWakelock(fakeKwlName1);
@@ -1355,7 +1384,7 @@ TEST_F(SystemSuspendSameThreadTest, GetKernelWakeLockStats) {
 }
 
 // Test that getWakeLockStats has correct information about Native AND Kernel WakeLocks.
-TEST_F(SystemSuspendSameThreadTest, GetNativeAndKernelWakeLockStats) {
+TEST_P(ParameterizedSystemSuspendSameThreadTest, GetNativeAndKernelWakeLockStats) {
     std::string fakeNwlName = "fakeNwl";
     std::string fakeKwlName = "fakeKwl";
 
@@ -1484,8 +1513,11 @@ TEST_F(SystemSuspendSameThreadTest, GetSuspendStats) {
     ASSERT_EQ(stats.failedResumeEarly, 42);
     ASSERT_EQ(stats.failedResumeNoirq, 42);
     ASSERT_EQ(stats.lastFailedDev, "fakeDev");
-    ASSERT_EQ(stats.lastFailedErrno, 42);
+    ASSERT_EQ(stats.lastFailedErrno, -42);
     ASSERT_EQ(stats.lastFailedStep, "fakeStep");
+    ASSERT_EQ(stats.lastHwSleep, 42);
+    ASSERT_EQ(stats.totalHwSleep, 42);
+    ASSERT_EQ(stats.maxHwSleep, 523986009990);
 }
 
 class SuspendWakeupTest : public ::testing::Test {
@@ -1815,6 +1847,42 @@ TEST(WakeupListTest, TestLRUEvict) {
     ASSERT_EQ(wakeups[1].count, 3);
     ASSERT_EQ(wakeups[2].name, "a");
     ASSERT_EQ(wakeups[2].count, 2);
+}
+
+struct WakeLockInfoField {
+    int32_t bit = 0;
+    std::function<int(WakeLockInfo)> getter;
+    int64_t expectedValue;
+};
+
+// Test that selected fields are properly set.
+TEST_P(ParameterizedSystemSuspendSameThreadTest, GetKernelWakeLockStatsFiltered) {
+    using ISCSI = ISuspendControlServiceInternal;
+    static const WakeLockInfoField FIELDS[] = {
+        {ISCSI::WAKE_LOCK_INFO_ACTIVE_COUNT, [](WakeLockInfo wl) { return wl.activeCount; }, 1},
+        {ISCSI::WAKE_LOCK_INFO_LAST_CHANGE, [](WakeLockInfo wl) { return wl.lastChange; }, 2},
+        {ISCSI::WAKE_LOCK_INFO_MAX_TIME, [](WakeLockInfo wl) { return wl.maxTime; }, 3},
+        {ISCSI::WAKE_LOCK_INFO_TOTAL_TIME, [](WakeLockInfo wl) { return wl.totalTime; }, 4},
+        {ISCSI::WAKE_LOCK_INFO_ACTIVE_TIME, [](WakeLockInfo wl) { return wl.activeTime; }, 5},
+        {ISCSI::WAKE_LOCK_INFO_EVENT_COUNT, [](WakeLockInfo wl) { return wl.eventCount; }, 6},
+        {ISCSI::WAKE_LOCK_INFO_EXPIRE_COUNT, [](WakeLockInfo wl) { return wl.expireCount; }, 7},
+        {ISCSI::WAKE_LOCK_INFO_PREVENT_SUSPEND_TIME,
+         [](WakeLockInfo wl) { return wl.preventSuspendTime; }, 8},
+        {ISCSI::WAKE_LOCK_INFO_WAKEUP_COUNT, [](WakeLockInfo wl) { return wl.wakeupCount; }, 9},
+    };
+
+    std::string fakeKwlName1 = "fakeKwl1";
+    addKernelWakelock(fakeKwlName1, /* activeCount = */ 1, /* activeTime = */ 5,
+                      /* eventCount = */ 6,
+                      /* expireCount = */ 7, /* lastChange = */ 2, /* maxTime = */ 3,
+                      /* preventSuspendTime = */ 8, /* totalTime = */ 4, /* wakeupCount = */ 9);
+    for (auto field : FIELDS) {
+        std::vector<WakeLockInfo> infos = getWakelockStats(field.bit);
+        WakeLockInfo wli;
+        ASSERT_TRUE(findWakeLockInfoByName(infos, fakeKwlName1, &wli));
+        ASSERT_EQ(field.getter(wli), field.expectedValue)
+            << "Bit mask " << field.bit << " had unexpected value";
+    }
 }
 
 }  // namespace android
