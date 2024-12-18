@@ -43,5 +43,7 @@ parcelable AudioHalEngineConfig {
   parcelable CapSpecificConfig {
     android.media.audio.common.AudioHalCapCriterion[] criteria;
     android.media.audio.common.AudioHalCapCriterionType[] criterionTypes;
+    @nullable android.media.audio.common.AudioHalCapCriterionV2[] criteriaV2;
+    @nullable android.media.audio.common.AudioHalCapDomain[] domains;
   }
 }

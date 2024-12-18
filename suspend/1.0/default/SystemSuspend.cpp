@@ -23,10 +23,12 @@
 #include <aidl/android/system/suspend/IWakeLock.h>
 #include <android-base/file.h>
 #include <android-base/logging.h>
+#include <android-base/parseint.h>
 #include <android-base/properties.h>
 #include <android-base/stringprintf.h>
 #include <android-base/strings.h>
 #include <android/binder_manager.h>
+#include <android/system/suspend/internal/ISuspendControlServiceInternal.h>
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -42,10 +44,14 @@ using ::aidl::android::system::suspend::IWakeLock;
 using ::aidl::android::system::suspend::WakeLockType;
 using ::android::base::CachedProperty;
 using ::android::base::Error;
+using ::android::base::ParseInt;
+using ::android::base::ParseUint;
 using ::android::base::ReadFdToString;
 using ::android::base::StringPrintf;
 using ::android::base::WriteStringToFd;
 using ::std::string;
+
+using ISCSI = ::android::system::suspend::internal::ISuspendControlServiceInternal;
 
 namespace android {
 namespace system {
@@ -422,7 +428,8 @@ void SystemSuspend::logKernelWakeLockStats() {
     std::stringstream klStats;
     klStats << "Kernel wakesource stats: ";
     std::vector<WakeLockInfo> wlStats;
-    mStatsList.getWakeLockStats(&wlStats);
+    mStatsList.getWakeLockStats(
+        ISCSI::WAKE_LOCK_INFO_ACTIVE_COUNT | ISCSI::WAKE_LOCK_INFO_TOTAL_TIME, &wlStats);
 
     for (const WakeLockInfo& wake : wlStats) {
         if ((wake.isKernelWakelock) && (wake.activeCount > 0)) {
@@ -543,6 +550,26 @@ const WakeupList& SystemSuspend::getWakeupList() const {
     return mWakeupList;
 }
 
+static int parseIntStat(std::string& statName, std::string& valStr) {
+    int statVal = -1;
+    bool parseSuccess = ParseInt(valStr, &statVal);
+    if (!parseSuccess) {
+        LOG(ERROR) << "Failed to parse " << statName << ", val: " << valStr;
+    }
+
+    return statVal;
+}
+
+static uint64_t parseUintStat(std::string& statName, std::string& valStr) {
+    uint64_t statVal = 0;
+    bool parseSuccess = ParseUint(valStr, &statVal);
+    if (!parseSuccess) {
+        LOG(ERROR) << "Failed to parse " << statName << ", val: " << valStr;
+    }
+
+    return statVal;
+}
+
 /**
  * Returns suspend stats.
  */
@@ -593,31 +620,34 @@ Result<SuspendStats> SystemSuspend::getSuspendStats() {
             stats.lastFailedDev = valStr;
         } else if (statName == "last_failed_step") {
             stats.lastFailedStep = valStr;
-        } else {
-            int statVal = std::stoi(valStr);
-            if (statName == "success") {
-                stats.success = statVal;
-            } else if (statName == "fail") {
-                stats.fail = statVal;
-            } else if (statName == "failed_freeze") {
-                stats.failedFreeze = statVal;
-            } else if (statName == "failed_prepare") {
-                stats.failedPrepare = statVal;
-            } else if (statName == "failed_suspend") {
-                stats.failedSuspend = statVal;
-            } else if (statName == "failed_suspend_late") {
-                stats.failedSuspendLate = statVal;
-            } else if (statName == "failed_suspend_noirq") {
-                stats.failedSuspendNoirq = statVal;
-            } else if (statName == "failed_resume") {
-                stats.failedResume = statVal;
-            } else if (statName == "failed_resume_early") {
-                stats.failedResumeEarly = statVal;
-            } else if (statName == "failed_resume_noirq") {
-                stats.failedResumeNoirq = statVal;
-            } else if (statName == "last_failed_errno") {
-                stats.lastFailedErrno = statVal;
-            }
+        } else if (statName == "success") {
+            stats.success = parseIntStat(statName, valStr);
+        } else if (statName == "fail") {
+            stats.fail = parseIntStat(statName, valStr);
+        } else if (statName == "failed_freeze") {
+            stats.failedFreeze = parseIntStat(statName, valStr);
+        } else if (statName == "failed_prepare") {
+            stats.failedPrepare = parseIntStat(statName, valStr);
+        } else if (statName == "failed_suspend") {
+            stats.failedSuspend = parseIntStat(statName, valStr);
+        } else if (statName == "failed_suspend_late") {
+            stats.failedSuspendLate = parseIntStat(statName, valStr);
+        } else if (statName == "failed_suspend_noirq") {
+            stats.failedSuspendNoirq = parseIntStat(statName, valStr);
+        } else if (statName == "failed_resume") {
+            stats.failedResume = parseIntStat(statName, valStr);
+        } else if (statName == "failed_resume_early") {
+            stats.failedResumeEarly = parseIntStat(statName, valStr);
+        } else if (statName == "failed_resume_noirq") {
+            stats.failedResumeNoirq = parseIntStat(statName, valStr);
+        } else if (statName == "last_failed_errno") {
+            stats.lastFailedErrno = parseIntStat(statName, valStr);
+        } else if (statName == "last_hw_sleep") {
+            stats.lastHwSleep = parseUintStat(statName, valStr);
+        } else if (statName == "total_hw_sleep") {
+            stats.totalHwSleep = parseUintStat(statName, valStr);
+        } else if (statName == "max_hw_sleep") {
+            stats.maxHwSleep = parseUintStat(statName, valStr);
         }
     }
 

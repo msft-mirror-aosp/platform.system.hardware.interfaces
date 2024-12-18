@@ -137,4 +137,8 @@ enum ResponseCode {
      */
     GET_ATTESTATION_APPLICATION_ID_FAILED = 27,
 
+    /**
+     * Indicates that some information is not available.
+     */
+    INFO_NOT_AVAILABLE = 28,
 }
