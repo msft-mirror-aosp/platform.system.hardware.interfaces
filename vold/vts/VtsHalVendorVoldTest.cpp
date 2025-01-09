@@ -16,6 +16,8 @@
 
 #define LOG_TAG "vold_aidl_hal_test"
 
+#include <aidl/Gtest.h>
+#include <aidl/Vintf.h>
 #include <android/system/vold/BnVoldCheckpointListener.h>
 #include <android/system/vold/CheckpointingState.h>
 #include <android/system/vold/IVold.h>
@@ -31,7 +33,19 @@ using ::android::system::vold::BnVoldCheckpointListener;
 using ::android::system::vold::CheckpointingState;
 using ::android::system::vold::IVold;
 
-const char KVoldName[] = "android.system.vold.IVold/default";
+class VoldAidlTest : public ::testing::TestWithParam<std::string> {
+   public:
+    sp<IVold> vold_;
+
+    void SetUp() final {
+        auto manager = defaultServiceManager();
+        auto name = GetParam();
+        auto binder = manager->waitForService(String16(name.data(), name.size()));
+        vold_ = IVold::asInterface(binder);
+    }
+
+    void TearDown() final {}
+};
 
 class TestListener : public BnVoldCheckpointListener {
    public:
@@ -46,14 +60,17 @@ class TestListener : public BnVoldCheckpointListener {
     int called_ = 0;
 };
 
-TEST(VoldAidlTest, PostBootAddListener) {
-    auto manager = defaultServiceManager();
-    auto binder = manager->waitForService(String16(KVoldName));
-    auto vold = IVold::asInterface(binder);
+TEST_P(VoldAidlTest, PostBootAddListener) {
     auto listener = sp<TestListener>::make();
 
     CheckpointingState state;
-    vold->registerCheckpointListener(listener, &state);
+    Status ret = vold_->registerCheckpointListener(listener, &state);
+    ASSERT_EQ(ret.isOk(), true);
     EXPECT_EQ(state, CheckpointingState::CHECKPOINTING_COMPLETE);
     EXPECT_EQ(listener->timesCalled(), 0);
 }
+
+GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(VoldAidlTest);
+INSTANTIATE_TEST_SUITE_P(PerInstance, VoldAidlTest,
+                         testing::ValuesIn(::android::getAidlHalInstanceNames(IVold::descriptor)),
+                         android::PrintInstanceNameToString);
