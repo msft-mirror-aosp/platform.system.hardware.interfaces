@@ -71,9 +71,15 @@ parcelable AudioPlaybackRate {
         SYS_RESERVED_CUT_REPEAT = -1,
         /** Reserved for use by the framework. */
         SYS_RESERVED_DEFAULT = 0,
-        /** Play silence for parameter values that are out of range. */
+        /**
+         * If possible, play silence for parameter values that are out of range,
+         * otherwise return an error (same as 'FAIL' would return).
+         */
         MUTE = 1,
-        /** Return an error while trying to set the parameters. */
+        /**
+         * Always return an error while trying to set the parameters that are
+         * out of range.
+         */
         FAIL = 2,
     }
     /**
