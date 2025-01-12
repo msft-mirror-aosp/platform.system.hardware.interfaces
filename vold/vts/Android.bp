@@ -4,7 +4,10 @@ package {
 
 cc_test {
     name: "VtsHalVendorVoldTest",
-    defaults: ["VtsHalTargetTestDefaults"],
+    defaults: [
+        "VtsHalTargetTestDefaults",
+        "use_libaidlvintf_gtest_helper_static",
+    ],
     srcs: ["VtsHalVendorVoldTest.cpp"],
     static_libs: [
         "android.system.vold-V1-cpp",
