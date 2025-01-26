@@ -1,11 +1,11 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright 2020, The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -31,32 +31,29 @@
 // with such a backward incompatible change, it has a high risk of breaking
 // later when a module using the interface is updated, e.g., Mainline modules.
 
-package android.media.audio.common;
+package android.system.keystore2;
 /* @hide */
 @Backing(type="int") @VintfStability
-enum AudioUsage {
-  INVALID = (-1) /* -1 */,
-  UNKNOWN = 0,
-  MEDIA = 1,
-  VOICE_COMMUNICATION = 2,
-  VOICE_COMMUNICATION_SIGNALLING = 3,
-  ALARM = 4,
-  NOTIFICATION = 5,
-  NOTIFICATION_TELEPHONY_RINGTONE = 6,
-  SYS_RESERVED_NOTIFICATION_COMMUNICATION_REQUEST = 7,
-  SYS_RESERVED_NOTIFICATION_COMMUNICATION_INSTANT = 8,
-  SYS_RESERVED_NOTIFICATION_COMMUNICATION_DELAYED = 9,
-  NOTIFICATION_EVENT = 10,
-  ASSISTANCE_ACCESSIBILITY = 11,
-  ASSISTANCE_NAVIGATION_GUIDANCE = 12,
-  ASSISTANCE_SONIFICATION = 13,
-  GAME = 14,
-  VIRTUAL_SOURCE = 15,
-  ASSISTANT = 16,
-  CALL_ASSISTANT = 17,
-  EMERGENCY = 1000,
-  SAFETY = 1001,
-  VEHICLE_STATUS = 1002,
-  ANNOUNCEMENT = 1003,
-  SPEAKER_CLEANUP = 1004,
+enum ResponseCode {
+  LOCKED = 2,
+  UNINITIALIZED = 3,
+  SYSTEM_ERROR = 4,
+  PERMISSION_DENIED = 6,
+  KEY_NOT_FOUND = 7,
+  VALUE_CORRUPTED = 8,
+  KEY_PERMANENTLY_INVALIDATED = 17,
+  BACKEND_BUSY = 18,
+  OPERATION_BUSY = 19,
+  INVALID_ARGUMENT = 20,
+  TOO_MUCH_DATA = 21,
+  /**
+   * @deprecated replaced by other OUT_OF_KEYS_* errors below
+   */
+  OUT_OF_KEYS = 22,
+  OUT_OF_KEYS_REQUIRES_SYSTEM_UPGRADE = 23,
+  OUT_OF_KEYS_PENDING_INTERNET_CONNECTIVITY = 24,
+  OUT_OF_KEYS_TRANSIENT_ERROR = 25,
+  OUT_OF_KEYS_PERMANENT_ERROR = 26,
+  GET_ATTESTATION_APPLICATION_ID_FAILED = 27,
+  INFO_NOT_AVAILABLE = 28,
 }
